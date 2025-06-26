@@ -64,3 +64,6 @@ end
 
 # Use devise for authentication
 gem "devise", "~> 4.9.4"
+
+# Use Pundit for authorization
+gem "pundit", "~> 2.5"

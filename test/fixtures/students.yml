@@ -1,0 +1,11 @@
+john_harvard:
+  first_name: "John"
+  last_name: "Doe"
+  school: harvard
+  user: student_user
+
+jane_mit:
+  first_name: "Jane"
+  last_name: "Smith"
+  school: mit
+  user: mit_student

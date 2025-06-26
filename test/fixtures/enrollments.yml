@@ -1,0 +1,14 @@
+john_cs101_enrollment:
+  student: john_harvard
+  purchase: john_course_purchase
+  enrollable: harvard_cs101 (Course)
+
+john_term_enrollment:
+  student: john_harvard
+  purchase: john_term_purchase
+  enrollable: harvard_fall_2025 (Term)
+
+jane_physics_enrollment:
+  student: jane_mit
+  purchase: jane_course_purchase
+  enrollable: mit_physics (Course)

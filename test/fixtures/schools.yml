@@ -1,0 +1,10 @@
+harvard:
+  name: "Harvard University"
+  admin: admin_user
+
+mit:
+  name: "MIT"
+  admin: platform_admin
+
+stanford:
+  name: "Stanford University"

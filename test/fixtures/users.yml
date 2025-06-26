@@ -1,0 +1,24 @@
+student_user:
+  email: "student@harvard.edu"
+  encrypted_password: "<%= Devise::Encryptor.digest(User, 'password123') %>"
+  role: 0 # student
+
+admin_user:
+  email: "admin@harvard.edu"
+  encrypted_password: "<%= Devise::Encryptor.digest(User, 'password123') %>"
+  role: 1 # school_admin
+
+platform_admin:
+  email: "platform@admin.com"
+  encrypted_password: "<%= Devise::Encryptor.digest(User, 'password123') %>"
+  role: 2 # platform_admin
+
+mit_student:
+  email: "student@mit.edu"
+  encrypted_password: "<%= Devise::Encryptor.digest(User, 'password123') %>"
+  role: 0 # student
+
+mit_admin:
+  email: "admin@mit.edu"
+  encrypted_password: "<%= Devise::Encryptor.digest(User, 'password123') %>"
+  role: 1 # school_admin

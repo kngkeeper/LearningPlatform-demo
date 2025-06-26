@@ -1,0 +1,16 @@
+john_credit_card:
+  method_type: 0 # credit_card
+  details: '{"card_number": "****1234", "expiry": "12/26"}'
+  student: john_harvard
+  license: harvard_license_active
+
+john_license_payment:
+  method_type: 1 # license
+  student: john_harvard
+  license: harvard_license_redeemed
+
+jane_credit_card:
+  method_type: 0 # credit_card
+  details: '{"card_number": "****5678", "expiry": "10/27"}'
+  student: jane_mit
+  license: mit_license

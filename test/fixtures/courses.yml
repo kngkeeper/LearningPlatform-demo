@@ -1,0 +1,15 @@
+harvard_cs101:
+  name: "Introduction to Computer Science"
+  term: harvard_fall_2025
+
+harvard_cs102:
+  name: "Advanced Computer Science"
+  term: harvard_spring_2026
+
+mit_physics:
+  name: "Quantum Physics"
+  term: mit_fall_2025
+
+current_course:
+  name: "Current Course"
+  term: current_term

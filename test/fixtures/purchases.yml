@@ -1,0 +1,17 @@
+john_course_purchase:
+  active: true
+  student: john_harvard
+  payment_method: john_credit_card
+  purchaseable: harvard_cs101 (Course)
+
+john_term_purchase:
+  active: true
+  student: john_harvard
+  payment_method: john_license_payment
+  purchaseable: harvard_fall_2025 (Term)
+
+jane_course_purchase:
+  active: true
+  student: jane_mit
+  payment_method: jane_credit_card
+  purchaseable: mit_physics (Course)

@@ -1,0 +1,24 @@
+harvard_license_active:
+  code: "HARVARD-2025-001"
+  status: 0 # active
+  school: harvard
+  term: harvard_fall_2025
+
+harvard_license_redeemed:
+  code: "HARVARD-2025-002"
+  status: 1 # redeemed
+  redeemed_at: <%= 1.day.ago %>
+  school: harvard
+  term: harvard_fall_2025
+
+mit_license:
+  code: "MIT-2025-001"
+  status: 0 # active
+  school: mit
+  term: mit_fall_2025
+
+stanford_license_expired:
+  code: "STANFORD-2024-999"
+  status: 2 # expired
+  school: stanford
+  term: stanford_spring_2025

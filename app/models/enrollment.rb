@@ -47,16 +47,15 @@ class Enrollment < ApplicationRecord
 
   def enrollable_matches_purchase_for_direct_enrollments
     return unless enrollable && purchase&.purchaseable
-    return unless enrollable.is_a?(Course)
 
     # For direct course purchases, enrollable should match purchaseable
     if purchase.purchaseable.is_a?(Course) && enrollable != purchase.purchaseable
       errors.add(:enrollable, "must match purchase for direct enrollments")
     end
 
-    # For term purchases, enrollable course should be in the purchased term
-    if purchase.purchaseable.is_a?(Term) && enrollable.term != purchase.purchaseable
-      errors.add(:enrollable, "must be in the purchased term")
+    # For term purchases, enrollable should be the term itself
+    if purchase.purchaseable.is_a?(Term) && enrollable != purchase.purchaseable
+      errors.add(:enrollable, "must match the purchased term for term enrollments")
     end
   end
 

@@ -44,7 +44,8 @@ class Purchase < ApplicationRecord
 
   def deactivate!
     update_columns(active: false)
-    enrollments.each { |enrollment| enrollment.update_columns(active: false) if enrollment.respond_to?(:active) }
+    # Note: Enrollments don't have an active column - their active status
+    # is determined by the purchase's active status
   end
 
   private
@@ -98,13 +99,12 @@ class Purchase < ApplicationRecord
         enrollable: purchaseable
       )
     when Term
-      # Term purchase - create enrollments for all courses in the term
-      purchaseable.courses.each do |course|
-        enrollments.find_or_create_by!(
-          student: student,
-          enrollable: course
-        )
-      end
+      # Term purchase - create a single enrollment for the term
+      # This gives access to all courses in the term via the grants_access_to? logic
+      enrollments.find_or_create_by!(
+        student: student,
+        enrollable: purchaseable
+      )
     end
   end
 end

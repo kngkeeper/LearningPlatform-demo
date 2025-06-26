@@ -12,12 +12,12 @@ class CoursePolicy < ApplicationPolicy
 
     direct_purchase = Purchase.active.exists?(
       student: student,
-      purchasable: @course
+      purchaseable: @course
     )
 
     term_subscription = Purchase.active.exists?(
       student: student,
-      purchasable: @course.term
+      purchaseable: @course.term
     )
 
     direct_purchase || term_subscription

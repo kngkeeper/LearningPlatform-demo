@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_25_230628) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_26_193958) do
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.bigint "term_id", null: false
@@ -51,7 +51,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_230628) do
     t.integer "method_type"
     t.json "details"
     t.bigint "student_id", null: false
-    t.bigint "license_id", null: false
+    t.bigint "license_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["license_id"], name: "index_payment_methods_on_license_id"
@@ -115,9 +115,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_230628) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "courses", "terms"
-  add_foreign_key "enrollments", "purchases"
-  add_foreign_key "enrollments", "students"
   add_foreign_key "licenses", "schools"
   add_foreign_key "licenses", "terms"
   add_foreign_key "payment_methods", "licenses"

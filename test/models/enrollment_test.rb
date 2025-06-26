@@ -49,28 +49,39 @@ class EnrollmentTest < ActiveSupport::TestCase
     assert_includes @course_enrollment.errors[:enrollable], "must match purchase for direct enrollments"
   end
 
-  test "should allow course enrollment when purchase is for term" do
-    # Student purchased a term, should be able to enroll in courses within that term
-    course_in_term = courses(:harvard_cs101) # This course is in harvard_fall_2025
-    term_purchase_enrollment = Enrollment.new(
+  test "should allow term enrollment when purchase is for term" do
+    # Create a new term purchase that doesn't already have an enrollment
+    spring_term = terms(:harvard_spring_2026)
+    payment_method = payment_methods(:john_credit_card)
+
+    # Create a purchase for the spring term
+    spring_purchase = Purchase.create!(
       student: students(:john_harvard),
-      purchase: purchases(:john_term_purchase), # This purchase is for harvard_fall_2025 term
-      enrollable: course_in_term
+      payment_method: payment_method,
+      purchaseable: spring_term,
+      active: true
     )
 
-    assert term_purchase_enrollment.valid?
+    # Now try to create an enrollment for this term purchase
+    term_purchase_enrollment = Enrollment.new(
+      student: students(:john_harvard),
+      purchase: spring_purchase,
+      enrollable: spring_term
+    )
+
+    assert term_purchase_enrollment.valid?, "Enrollment should be valid but got errors: #{term_purchase_enrollment.errors.full_messages}"
   end
 
-  test "should not allow course enrollment when course is not in purchased term" do
-    course_different_term = courses(:harvard_cs102) # This course is in harvard_spring_2026
+  test "should not allow term enrollment when enrollable doesn't match purchased term" do
+    different_term = terms(:harvard_spring_2026)
     term_purchase_enrollment = Enrollment.new(
       student: students(:john_harvard),
       purchase: purchases(:john_term_purchase), # This purchase is for harvard_fall_2025 term
-      enrollable: course_different_term
+      enrollable: different_term
     )
 
     assert_not term_purchase_enrollment.valid?
-    assert_includes term_purchase_enrollment.errors[:enrollable], "must be in the purchased term"
+    assert_includes term_purchase_enrollment.errors[:enrollable], "must match the purchased term for term enrollments"
   end
 
   test "should prevent duplicate enrollments" do

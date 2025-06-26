@@ -10,6 +10,8 @@ class Term < ApplicationRecord
   validates :end_date, presence: true
   validate :end_date_after_start_date
 
+  scope :current_and_upcoming, -> { where("end_date >= ?", Date.current) }
+
   def active?
     (start_date..end_date).cover?(Date.current)
   end

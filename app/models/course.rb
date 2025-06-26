@@ -7,6 +7,14 @@ class Course < ApplicationRecord
   validates :name, presence: true
   validates :name, uniqueness: { scope: :term_id }
 
+  scope :available_for_enrollment, ->(school) {
+    joins(:term)
+      .where(terms: { school: school })
+      .where("terms.end_date >= ?", Date.current)
+      .includes(:term)
+      .order("terms.start_date ASC, courses.name ASC")
+  }
+
   delegate :school, to: :term
 
   def available?

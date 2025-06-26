@@ -1,0 +1,66 @@
+<% content_for :title, "Available Courses" %>
+
+<div class="container">
+  <header class="page-header">
+    <h1>Available Courses</h1>
+    <% if current_user.student %>
+      <p class="school-info">Courses available at <%= current_user.student.school.name %></p>
+    <% end %>
+  </header>
+
+  <% if @courses.any? %>
+    <div class="courses-grid">
+      <% @courses.group_by(&:term).each do |term, courses| %>
+        <section class="term-section">
+          <h2 class="term-title">
+            <%= term.name %>
+            <span class="term-dates">
+              (<%= term.start_date.strftime("%b %d, %Y") %> - <%= term.end_date.strftime("%b %d, %Y") %>)
+            </span>
+            <% if term.active? %>
+              <span class="term-status active">Current</span>
+            <% else %>
+              <span class="term-status upcoming">Upcoming</span>
+            <% end %>
+          </h2>
+          
+          <div class="courses-list">
+            <% courses.each do |course| %>
+              <div class="course-card">
+                <div class="course-header">
+                  <h3 class="course-name"><%= course.name %></h3>
+                  <span class="course-price">$<%= number_with_precision(course.price, precision: 0) %></span>
+                </div>
+                
+                <div class="course-meta">
+                  <p class="enrolled-count">
+                    <%= pluralize(course.enrolled_students_count, 'student') %> enrolled
+                  </p>
+                </div>
+                
+                <div class="course-actions">
+                  <% if policy(course).access? %>
+                    <span class="access-badge enrolled">You have access</span>
+                  <% else %>
+                    <button class="btn btn-primary" disabled>
+                      Enroll Now
+                    </button>
+                    <small class="enrollment-note">Enrollment functionality coming soon</small>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <h2>No Courses Available</h2>
+      <p>There are currently no courses available for enrollment at your school.</p>
+      <% if current_user.student %>
+        <p>Check back later or contact <%= current_user.student.school.name %> for more information.</p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -65,6 +65,9 @@ course_subjects = [
 course_levels = [ "Beginner", "Intermediate", "Advanced" ]
 
 Term.all.each do |term|
+  # Skip if this term already has courses
+  next if term.courses.exists?
+
   # Create 5-8 courses per term
   courses_per_term = rand(5..8)
   selected_subjects = course_subjects.sample(courses_per_term)
@@ -84,10 +87,11 @@ Term.all.each do |term|
 
     Course.find_or_create_by!(
       name: course_name,
-      term: term,
-      content: "This is the course content for #{course_name}.",
-      price: course_price
-    )
+      term: term
+    ) do |course|
+      course.content = "This is the course content for #{course_name}."
+      course.price = course_price
+    end
   end
 end
 
@@ -95,10 +99,14 @@ puts "Created #{Course.count} courses across all terms"
 
 # Create students for each school
 School.all.each do |school|
-  5.times do
+  # Only create students if this school doesn't have any yet
+  next if school.students.exists?
+
+  5.times do |i|
     first_name = Faker::Name.first_name
     last_name = Faker::Name.last_name
-    email = Faker::Internet.unique.email(name: "#{first_name} #{last_name}")
+    # Use deterministic email to avoid unique constraint issues
+    email = "#{first_name.downcase}.#{last_name.downcase}.#{school.id}.#{i}@example.com"
 
     User.find_or_create_by!(email: email) do |user|
       user.role = :student
@@ -122,11 +130,17 @@ puts "Created #{Student.count} students"
 
 # Create licenses for terms
 Term.all.each do |term|
-  5.times do
+  # Skip if this term already has licenses
+  next if term.licenses.exists?
+
+  5.times do |i|
+    # Generate a unique code by including the index
+    code = "#{License.generate_code(term.school.name.parameterize.upcase, term.start_date.year)}-#{i+1}"
+
     License.find_or_create_by!(
       school: term.school,
       term: term,
-      code: License.generate_code(term.school.name.parameterize.upcase, term.start_date.year)
+      code: code
     )
   end
 end
@@ -135,36 +149,86 @@ puts "Created #{License.count} licenses"
 
 # Enroll students
 Student.all.each do |student|
+  # Skip if student already has enrollments
+  next if student.enrollments.exists?
+
   # Enroll in one term via license
   term_to_enroll = student.school.terms.sample
-  license = term_to_enroll.licenses.where(status: :active).sample
+  license = term_to_enroll.licenses.where(status: :active).first
   if license
-    payment_method = PaymentMethod.create!(student: student, method_type: :license, license: license)
-    purchase = Purchase.create!(student: student, payment_method: payment_method, purchaseable: term_to_enroll)
-    purchase.process!
-    license.update(status: :redeemed)
+    # Check if payment method already exists for this student and license
+    payment_method = PaymentMethod.find_or_create_by!(
+      student: student,
+      method_type: :license,
+      license: license
+    )
+
+    # Check if purchase already exists
+    purchase = Purchase.find_or_create_by!(
+      student: student,
+      payment_method: payment_method,
+      purchaseable: term_to_enroll
+    )
+
+    # Only process if not already processed
+    purchase.process! if purchase.status == 'pending'
+    license.update(status: :redeemed) if license.status == 'active'
   end
 
   # Enroll in 1-2 individual courses via credit card
-  courses_to_enroll = student.school.courses.where.not(term: term_to_enroll).sample(rand(1..2))
+  available_courses = student.school.courses.where.not(term: term_to_enroll)
+  courses_to_enroll = available_courses.sample([ available_courses.count, 2 ].min)
+
   courses_to_enroll.each do |course|
-    payment_method = PaymentMethod.create!(
+    # Check if already enrolled in this course
+    next if student.enrollments.joins(:course).where(courses: { id: course.id }).exists?
+
+    payment_method = PaymentMethod.find_or_create_by!(
       student: student,
-      method_type: :credit_card,
-      details: {
+      method_type: :credit_card
+    ) do |pm|
+      pm.details = {
         cardholder_name: student.full_name,
         card_number: Faker::Finance.credit_card,
         expiry_month: Faker::Number.between(from: 1, to: 12),
         expiry_year: Date.current.year + Faker::Number.between(from: 1, to: 5),
         cvv: Faker::Number.number(digits: 3)
       }.to_json
+    end
+
+    purchase = Purchase.find_or_create_by!(
+      student: student,
+      payment_method: payment_method,
+      purchaseable: course
     )
-    purchase = Purchase.create!(student: student, payment_method: payment_method, purchaseable: course)
-    purchase.process!
+    purchase.process! if purchase.status == 'pending'
   end
 end
 
 puts "Enrolled students in courses and terms"
+
+# Generate and display sample license codes for each school
+puts "\n=== Sample License Codes for Testing ==="
+School.all.each do |school|
+  # Get the first term for this school
+  first_term = school.terms.order(:start_date).first
+  if first_term
+    # Find an active license for this term, or create one if none exists
+    sample_license = first_term.licenses.where(status: :active).first
+    if sample_license
+      puts "#{school.name}: #{sample_license.code}"
+    else
+      # Create a sample license if none exists
+      sample_code = "#{License.generate_code(school.name.parameterize.upcase, first_term.start_date.year)}-SAMPLE"
+      sample_license = License.find_or_create_by!(
+        school: school,
+        term: first_term,
+        code: sample_code
+      )
+      puts "#{school.name}: #{sample_license.code}"
+    end
+  end
+end
 
 # Summary
 puts "\n=== Seeding Summary ==="

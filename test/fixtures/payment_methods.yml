@@ -1,6 +1,6 @@
 john_credit_card:
   method_type: 0 # credit_card
-  details: '{"card_number": "****1234", "expiry": "12/26"}'
+  details: '{"card_number": "4111111111111111", "expiry_month": 12, "expiry_year": 2026, "cvv": "123", "cardholder_name": "John Harvard"}'
   student: john_harvard
   license: harvard_license_active
 
@@ -11,6 +11,6 @@ john_license_payment:
 
 jane_credit_card:
   method_type: 0 # credit_card
-  details: '{"card_number": "****5678", "expiry": "10/27"}'
+  details: '{"card_number": "5555555555554444", "expiry_month": 10, "expiry_year": 2027, "cvv": "456", "cardholder_name": "Jane MIT"}'
   student: jane_mit
   license: mit_license

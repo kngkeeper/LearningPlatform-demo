@@ -10,12 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_26_193958) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_01_235232) do
   create_table "courses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.bigint "term_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "content"
+    t.decimal "price", precision: 10
     t.index ["term_id"], name: "index_courses_on_term_id"
   end
 
@@ -99,6 +101,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_26_193958) do
     t.bigint "school_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "price", precision: 10
     t.index ["school_id"], name: "index_terms_on_school_id"
   end
 

@@ -1,0 +1,193 @@
+<% content_for :title, "Enroll in #{@course.name}" %>
+
+<div class="container">
+  <nav class="breadcrumb">
+    <%= link_to "Courses", courses_path, class: "breadcrumb-link" %> / 
+    <%= link_to @course.name, course_path(@course), class: "breadcrumb-link" %> / 
+    Enroll
+  </nav>
+
+  <div class="enrollment-container">
+    <header class="enrollment-header">
+      <h1>Enroll in <%= @course.name %></h1>
+      <p class="course-info">
+        <strong>Term:</strong> <%= @course.term.name %> | 
+        <strong>School:</strong> <%= @course.school.name %>
+      </p>
+    </header>
+
+    <div class="enrollment-options">
+      <div class="enrollment-cards">
+        <!-- Direct Course Purchase -->
+        <div class="enrollment-card" data-option="course">
+          <div class="card-header">
+            <input type="radio" name="enrollment_option" id="course_option" value="course" checked>
+            <label for="course_option" class="card-title">
+              <h3>Purchase This Course</h3>
+            </label>
+          </div>
+          
+          <div class="card-content">
+            <div class="price-display">
+              <span class="price">$<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %></span>
+            </div>
+            
+            <div class="option-details">
+              <p><strong>What you get:</strong></p>
+              <ul>
+                <li>Access to <strong><%= @course.name %></strong></li>
+                <li>Available until <%= @course.term.end_date.strftime("%B %d, %Y") %></li>
+                <li>Immediate access after payment</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Term Subscription -->
+        <div class="enrollment-card" data-option="term">
+          <div class="card-header">
+            <input type="radio" name="enrollment_option" id="term_option" value="term">
+            <label for="term_option" class="card-title">
+              <h3>Purchase Full Term</h3>
+            </label>
+          </div>
+          
+          <div class="card-content">
+            <div class="price-display">
+              <span class="price">$<%= number_with_precision(@enrollment_options[:term][:price], precision: 0) %></span>
+              <span class="price-note">for all courses</span>
+            </div>
+            
+            <div class="option-details">
+              <p><strong>What you get:</strong></p>
+              <ul>
+                <li>Access to <strong>all <%= @enrollment_options[:term][:courses_count] %> courses</strong> in <%= @course.term.name %></li>
+                <li>Available until <%= @course.term.end_date.strftime("%B %d, %Y") %></li>
+                <li>Immediate access after payment</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Form -->
+    <div class="payment-section">
+      <%= form_with url: course_enrollments_path(@course), local: true, class: "enrollment-form" do |form| %>
+        <input type="hidden" name="enrollment_type" id="enrollment_type" value="course">
+        
+        <div class="payment-form">
+          <h3>Payment Information</h3>
+          
+          <div class="form-row">
+            <div class="form-group full-width">
+              <%= form.label :cardholder_name, "Cardholder Name", class: "form-label" %>
+              <%= form.text_field :cardholder_name, placeholder: "John Doe", class: "form-input", required: true %>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <%= form.label :card_number, "Card Number", class: "form-label" %>
+              <%= form.text_field :card_number, placeholder: "1234 5678 9012 3456", class: "form-input", maxlength: "23", required: true %>
+              <small class="form-help">Enter 13-19 digit card number (spaces and dashes are okay)</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <%= form.label :expiry_month, "Expiry Month", class: "form-label" %>
+              <%= form.select :expiry_month, (1..12).map { |m| [sprintf("%02d", m), sprintf("%02d", m)] }, { prompt: "Month" }, { class: "form-select", required: true } %>
+            </div>
+            
+            <div class="form-group">
+              <%= form.label :expiry_year, "Expiry Year", class: "form-label" %>
+              <%= form.select :expiry_year, (Date.current.year..Date.current.year + 10).map { |y| [y, y] }, { prompt: "Year" }, { class: "form-select", required: true } %>
+            </div>
+            
+            <div class="form-group">
+              <%= form.label :cvv, "CVV", class: "form-label" %>
+              <%= form.text_field :cvv, placeholder: "123", class: "form-input", maxlength: "4", required: true %>
+              <small class="form-help">3 or 4 digits on back of card</small>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <div class="total-display">
+              <span class="total-label">Total:</span>
+              <span class="total-amount" id="total-amount">
+                $<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %>
+              </span>
+            </div>
+            
+            <%= form.submit "Complete Enrollment", class: "btn btn-primary btn-large" %>
+            <%= link_to "Cancel", course_path(@course), class: "btn btn-secondary" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const courseOption = document.getElementById('course_option');
+  const termOption = document.getElementById('term_option');
+  const enrollmentType = document.getElementById('enrollment_type');
+  const totalAmount = document.getElementById('total-amount');
+  
+  const coursePrice = <%= @enrollment_options[:course][:price] %>;
+  const termPrice = <%= @enrollment_options[:term][:price] %>;
+  
+  function updateSelection() {
+    if (courseOption.checked) {
+      enrollmentType.value = 'course';
+      totalAmount.textContent = '$' + coursePrice.toFixed(0);
+      
+      // Visual feedback
+      document.querySelector('[data-option="course"]').classList.add('selected');
+      document.querySelector('[data-option="term"]').classList.remove('selected');
+    } else if (termOption.checked) {
+      enrollmentType.value = 'term';
+      totalAmount.textContent = '$' + termPrice.toFixed(0);
+      
+      // Visual feedback
+      document.querySelector('[data-option="term"]').classList.add('selected');
+      document.querySelector('[data-option="course"]').classList.remove('selected');
+    }
+  }
+  
+  courseOption.addEventListener('change', updateSelection);
+  termOption.addEventListener('change', updateSelection);
+  
+  // Initialize
+  updateSelection();
+  
+  // Format card number input
+  const cardNumberInput = document.querySelector('input[name="card_number"]');
+  if (cardNumberInput) {
+    cardNumberInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/[^\d\s-]/g, ''); // Allow digits, spaces, and dashes
+      let digitsOnly = value.replace(/[\s-]/g, '');
+      
+      // Format as groups of 4 digits separated by spaces
+      let formattedValue = digitsOnly.replace(/(.{4})/g, '$1 ').trim();
+      
+      // Limit to reasonable length (19 digits + 4 spaces = 23 characters max)
+      if (formattedValue.length > 23) {
+        formattedValue = formattedValue.substr(0, 23);
+      }
+      
+      e.target.value = formattedValue;
+    });
+  }
+  
+  // CVV input - only allow digits
+  const cvvInput = document.querySelector('input[name="cvv"]');
+  if (cvvInput) {
+    cvvInput.addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '');
+    });
+  }
+});
+</script>

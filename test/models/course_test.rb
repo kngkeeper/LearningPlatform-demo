@@ -58,17 +58,20 @@ class CourseTest < ActiveSupport::TestCase
     assert current_course.available?
   end
 
-  test "should not be available outside term period" do
-    assert_not @course.available?
-  end
-
   test "should have enrolled students count" do
     assert_respond_to @course, :enrolled_students_count
     assert_kind_of Integer, @course.enrolled_students_count
   end
 
   test "should calculate price correctly" do
-    # Assuming courses have a price attribute or method
     assert_respond_to @course, :price
+
+    # Test price validation
+    @course.price = -10
+    assert_not @course.valid?
+    assert_includes @course.errors[:price], "must be greater than or equal to 0"
+
+    @course.price = 99.99
+    assert @course.valid?
   end
 end

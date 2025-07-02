@@ -1,0 +1,150 @@
+<% content_for :title, @course.name %>
+
+<div class="container">
+  <nav class="breadcrumb">
+    <%= link_to "Courses", courses_path, class: "breadcrumb-link" %> / <%= @course.name %>
+  </nav>
+
+  <header class="course-header">
+    <div class="course-title-section">
+      <h1 class="course-title"><%= @course.name %></h1>
+      <div class="course-meta">
+        <span class="term-info">
+          <strong>Term:</strong> <%= @course.term.name %>
+          (<%= @course.term.start_date.strftime("%b %d, %Y") %> - <%= @course.term.end_date.strftime("%b %d, %Y") %>)
+        </span>
+        <span class="school-info">
+          <strong>School:</strong> <%= @course.school.name %>
+        </span>
+        <span class="term-duration">
+          <strong>Duration:</strong> <%= distance_of_time_in_words(@course.term.start_date, @course.term.end_date) %>
+        </span>
+      </div>
+    </div>
+    
+    <div class="course-status">
+      <% if @course.term.active? %>
+        <span class="status-badge active">Active Term</span>
+      <% else %>
+        <span class="status-badge upcoming">Upcoming Term</span>
+      <% end %>
+      <% if @course.price.present? %>
+        <span class="course-price-badge">$<%= number_with_precision(@course.price, precision: 2) %></span>
+      <% end %>
+    </div>
+  </header>
+
+  <div class="course-content">
+    <div class="course-main">
+      <% if policy(@course).access? %>
+        <section class="enrollment-info">
+          <h2>Your Access</h2>
+          <div class="access-details">
+            <div class="course-access-banner">
+              <div class="access-banner-content">
+                <h3>Course content</h3>
+                <%= simple_format(@course.content) %>
+              </div>
+            </div>
+            
+            <h3>Your Enrollment Details</h3>
+            <% current_user.student.enrollments.active.each do |enrollment| %>
+              <% if enrollment.grants_access_to?(@course) %>
+                <div class="enrollment-card">
+                  <div class="enrollment-type">
+                    <% if enrollment.enrollable_type == 'Course' %>
+                      <strong>Direct Course Purchase</strong>
+                      <p>You purchased this course directly on <%= enrollment.enrollment_date.strftime("%B %d, %Y") %></p>
+                    <% elsif enrollment.enrollable_type == 'Term' %>
+                      <strong>Term Subscription</strong>
+                      <p>You have access through your <%= enrollment.enrollable.name %> subscription</p>
+                      <p>Purchased on <%= enrollment.enrollment_date.strftime("%B %d, %Y") %></p>
+                    <% end %>
+                  </div>
+                  
+                  <div class="payment-info">
+                    <% payment_method = enrollment.purchase.payment_method %>
+                    <small class="payment-method">
+                      Paid via 
+                      <% if payment_method.credit_card? %>
+                        Credit Card
+                      <% elsif payment_method.license? %>
+                        License Code (<%= payment_method.license.code %>)
+                      <% else %>
+                        <%= payment_method.method_type.humanize %>
+                      <% end %>
+                    </small>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </section>
+      <% elsif policy(@course).enroll? %>
+        <section class="enrollment-info">
+          <h2>Enrollment</h2>
+          <div class="enrollment-prompt">
+            <p>You don't currently have access to this course. Enroll now to get started!</p>
+            <div class="enrollment-options-preview">
+              <div class="option-preview">
+                <strong>Course Only:</strong> $<%= number_with_precision(@course.price, precision: 0) %>
+              </div>
+              <div class="option-preview">
+                <strong>Full Term (<%= @course.term.courses.count %> courses):</strong> 
+                $<%= number_with_precision(@course.term.courses.sum(&:price), precision: 0) %>
+              </div>
+            </div>
+            <%= link_to "Start Enrollment", new_course_enrollment_path(@course), class: "btn btn-primary btn-large" %>
+          </div>
+        </section>
+      <% else %>
+        <section class="enrollment-info">
+          <h2>Enrollment Not Available</h2>
+          <div class="enrollment-prompt">
+            <% if @course.school != current_user.student.school %>
+              <p>This course is not available for students from your school.</p>
+            <% elsif !@course.available? %>
+              <p>This course is no longer available for enrollment. The term has ended.</p>
+            <% else %>
+              <p>Enrollment for this course is not currently available.</p>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+
+    <aside class="course-sidebar">
+      <div class="term-info-card">
+        <h3><%= @course.term.name %></h3>
+        <div class="term-details">
+          <p><strong>Start Date:</strong> <%= @course.term.start_date.strftime("%B %d, %Y") %></p>
+          <p><strong>End Date:</strong> <%= @course.term.end_date.strftime("%B %d, %Y") %></p>
+          <p><strong>Status:</strong> 
+            <% if @course.term.active? %>
+              <span class="status active">Active</span>
+            <% else %>
+              <span class="status upcoming">Upcoming</span>
+            <% end %>
+          </p>
+        </div>
+        
+        <div class="term-courses">
+          <p><strong>Other courses in this term:</strong></p>
+          <ul class="related-courses">
+            <% @course.term.courses.where.not(id: @course.id).each do |related_course| %>
+              <li>
+                <% if policy(related_course).access? %>
+                  <%= link_to related_course.name, course_path(related_course), class: "course-link accessible" %>
+                  <span class="access-indicator">✓</span>
+                <% else %>
+                  <span class="course-name inaccessible"><%= related_course.name %></span>
+                  <span class="no-access-indicator">🔒</span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

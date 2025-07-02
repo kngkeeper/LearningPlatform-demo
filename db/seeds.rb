@@ -34,10 +34,10 @@ puts "Created #{School.count} schools"
 
 # Create terms for each school
 term_data = [
-  { name: "Fall 2025", start_date: Date.new(2025, 9, 1), end_date: Date.new(2025, 12, 15) },
-  { name: "Spring 2026", start_date: Date.new(2026, 1, 15), end_date: Date.new(2026, 5, 30) },
-  { name: "Summer 2026", start_date: Date.new(2026, 6, 1), end_date: Date.new(2026, 8, 15) },
-  { name: "Fall 2026", start_date: Date.new(2026, 9, 1), end_date: Date.new(2026, 12, 15) }
+  { name: "Fall 2025", start_date: Date.new(2025, 9, 1), end_date: Date.new(2025, 12, 15), price: 499.99 },
+  { name: "Spring 2026", start_date: Date.new(2026, 1, 15), end_date: Date.new(2026, 5, 30), price: 549.99 },
+  { name: "Summer 2026", start_date: Date.new(2026, 6, 1), end_date: Date.new(2026, 8, 15), price: 399.99 },
+  { name: "Fall 2026", start_date: Date.new(2026, 9, 1), end_date: Date.new(2026, 12, 15), price: 499.99 }
 ]
 
 School.all.each do |school|
@@ -48,6 +48,7 @@ School.all.each do |school|
     ) do |term|
       term.start_date = term_info[:start_date]
       term.end_date = term_info[:end_date]
+      term.price = term_info[:price]
     end
   end
 end
@@ -71,10 +72,21 @@ Term.all.each do |term|
   selected_subjects.each do |subject|
     level = course_levels.sample
     course_name = "#{subject} - #{level}"
+    # Assign a price based on level
+    course_price = case level
+    when "Beginner"
+      rand(49.99..99.99).round(2)
+    when "Intermediate"
+      rand(99.99..149.99).round(2)
+    when "Advanced"
+      rand(149.99..199.99).round(2)
+    end
 
     Course.find_or_create_by!(
       name: course_name,
-      term: term
+      term: term,
+      content: "This is the course content for #{course_name}.",
+      price: course_price
     )
   end
 end

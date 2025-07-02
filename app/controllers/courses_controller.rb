@@ -1,9 +1,16 @@
 class CoursesController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_student
+  before_action :set_course, only: [ :show ]
 
   def index
     @courses = available_courses_for_enrollment
+  end
+
+  def show
+    authorize @course, :access?
+  rescue Pundit::NotAuthorizedError
+    redirect_to courses_path, alert: "You don't have access to this course."
   end
 
   private
@@ -17,5 +24,9 @@ class CoursesController < ApplicationController
 
   def ensure_student
     redirect_to new_user_session_path unless current_user&.student?
+  end
+
+  def set_course
+    @course = Course.find(params[:id])
   end
 end

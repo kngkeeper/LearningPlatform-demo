@@ -8,12 +8,17 @@ class Term < ApplicationRecord
   validates :name, uniqueness: { scope: :school_id }
   validates :start_date, presence: true
   validates :end_date, presence: true
+  validates :price, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
   validate :end_date_after_start_date
 
   scope :current_and_upcoming, -> { where("end_date >= ?", Date.current) }
 
   def active?
     (start_date..end_date).cover?(Date.current)
+  end
+
+  def courses_total_price
+    courses.sum { |course| course.price || 0 }
   end
 
   private

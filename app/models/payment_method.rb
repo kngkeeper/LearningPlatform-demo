@@ -8,6 +8,7 @@ class PaymentMethod < ApplicationRecord
   validates :method_type, presence: true
   validates :details, presence: true, if: :credit_card?
   validate :valid_json, if: -> { credit_card? && details.present? }
+  validate :valid_credit_card_details, if: -> { credit_card? && details.present? }
   validates :license, presence: { message: "must exist" }, if: :license?
   validate :license_is_redeemable, if: -> { license? && license.present? }
 
@@ -70,5 +71,46 @@ class PaymentMethod < ApplicationRecord
   def process_license_payment(amount)
     # License payments are typically processed differently
     { success: true, transaction_id: "lic_#{license.code}", amount: amount }
+  end
+
+  def valid_credit_card_details
+    return unless details.present?
+
+    begin
+      parsed_details = JSON.parse(details)
+
+      # Validate card number (basic format check - digits with optional spaces/dashes)
+      card_number = parsed_details["card_number"].to_s.gsub(/[\s-]/, "")
+      unless card_number.match?(/\A\d{13,19}\z/)
+        errors.add(:details, "Card number must be 13-19 digits")
+      end
+
+      # Validate expiry month (1-12)
+      expiry_month = parsed_details["expiry_month"].to_i
+      unless (1..12).include?(expiry_month)
+        errors.add(:details, "Expiry month must be between 1 and 12")
+      end
+
+      # Validate expiry year (current year or future)
+      expiry_year = parsed_details["expiry_year"].to_i
+      unless expiry_year >= Date.current.year && expiry_year <= Date.current.year + 20
+        errors.add(:details, "Expiry year must be current year or in the future")
+      end
+
+      # Validate CVV (3-4 digits)
+      cvv = parsed_details["cvv"].to_s
+      unless cvv.match?(/\A\d{3,4}\z/)
+        errors.add(:details, "CVV must be 3 or 4 digits")
+      end
+
+      # Validate cardholder name (basic presence check)
+      cardholder_name = parsed_details["cardholder_name"].to_s.strip
+      if cardholder_name.length < 2
+        errors.add(:details, "Cardholder name must be at least 2 characters")
+      end
+
+    rescue JSON::ParserError
+      # This is already handled by valid_json method
+    end
   end
 end

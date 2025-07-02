@@ -93,4 +93,24 @@ class TermTest < ActiveSupport::TestCase
 
     assert mit_term.valid?
   end
+
+  test "should validate price" do
+    @term.price = -10
+    assert_not @term.valid?
+    assert_includes @term.errors[:price], "must be greater than or equal to 0"
+
+    @term.price = 499.99
+    assert @term.valid?
+  end
+
+  test "should calculate total price of all courses" do
+    assert_respond_to @term, :courses_total_price
+
+    # Use integer prices to avoid floating point issues in tests
+    @term.courses.create(name: "Test Course 1", price: 100)
+    @term.courses.create(name: "Test Course 2", price: 150)
+
+    expected_total = 250
+    assert_equal expected_total, @term.courses_total_price
+  end
 end

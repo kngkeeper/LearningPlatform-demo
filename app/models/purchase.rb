@@ -17,10 +17,10 @@ class Purchase < ApplicationRecord
   def total_price
     case purchaseable
     when Course
-      purchaseable.price
+      purchaseable.price || 0
     when Term
-      # Terms might have their own pricing logic
-      purchaseable.courses.sum(&:price)
+      # Use term price if set, otherwise fall back to sum of course prices
+      purchaseable.price || purchaseable.courses_total_price
     else
       0
     end

@@ -6,6 +6,7 @@ class Course < ApplicationRecord
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :term_id }
+  validates :price, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
 
   scope :available_for_enrollment, ->(school) {
     joins(:term)
@@ -18,15 +19,10 @@ class Course < ApplicationRecord
   delegate :school, to: :term
 
   def available?
-    term&.active?
+    term&.end_date >= Date.current
   end
 
   def enrolled_students_count
     students.count
-  end
-
-  def price
-    # Default price implementation - this could be made configurable
-    100.0
   end
 end

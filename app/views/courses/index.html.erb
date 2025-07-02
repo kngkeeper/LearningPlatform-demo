@@ -28,24 +28,24 @@
             <% courses.each do |course| %>
               <div class="course-card">
                 <div class="course-header">
-                  <h3 class="course-name"><%= course.name %></h3>
+                  <h3 class="course-name">
+                    <% if policy(course).access? %>
+                      <%= link_to course.name, course_path(course), class: "course-title-link" %>
+                    <% else %>
+                      <%= course.name %>
+                    <% end %>
+                  </h3>
                   <span class="course-price">$<%= number_with_precision(course.price, precision: 0) %></span>
-                </div>
-                
-                <div class="course-meta">
-                  <p class="enrolled-count">
-                    <%= pluralize(course.enrolled_students_count, 'student') %> enrolled
-                  </p>
                 </div>
                 
                 <div class="course-actions">
                   <% if policy(course).access? %>
+                    <%= link_to "View Course", course_path(course), class: "btn btn-primary" %>
                     <span class="access-badge enrolled">You have access</span>
+                  <% elsif policy(course).enroll? %>
+                    <%= link_to "Enroll Now", new_course_enrollment_path(course), class: "btn btn-primary" %>
                   <% else %>
-                    <button class="btn btn-primary" disabled>
-                      Enroll Now
-                    </button>
-                    <small class="enrollment-note">Enrollment functionality coming soon</small>
+                    <span class="btn btn-disabled">Not Available</span>
                   <% end %>
                 </div>
               </div>

@@ -25,11 +25,17 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
+  <% if ENV['CI'] %>
+  adapter: sqlite3
+  database: ":memory:"
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  <% else %>
   <<: *default
   database: learning_platform_test
-  <% if ENV['CI'] %>
-  host: 127.0.0.1
-  username: root
+  username: learning_platform
+  password: dummypassword
+  host: localhost
   <% end %>
 
 # As with config/credentials.yml, you never want to store sensitive information,

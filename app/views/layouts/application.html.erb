@@ -30,6 +30,9 @@
         </div>
         <div class="navbar-nav">
           <% if user_signed_in? %>
+            <% if current_user.platform_admin? %>
+              <%= link_to "Dashboard", dashboard_path, class: "nav-link admin-link" %>
+            <% end %>
             <span class="user-greeting">Hello, <%= current_user.student&.full_name || current_user.email %></span>
             <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "nav-link" %>
           <% else %>

@@ -1,0 +1,111 @@
+<% content_for :title, "#{@dashboard_data[:school].name} Dashboard" %>
+
+<div class="school-dashboard-container">
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1><%= @dashboard_data[:school].name %> Dashboard</h1>
+      <p class="text-muted">Detailed analytics for this school</p>
+    </div>
+    <div class="header-actions">
+      <%= link_to "← Back to Platform Dashboard", dashboard_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <!-- Payment Methods Overview -->
+  <div class="payment-overview">
+    <h2>Payment Methods Summary</h2>
+    <div class="payment-summary-grid">
+      <div class="payment-summary-card credit-card">
+        <h3><%= @dashboard_data[:payment_methods][:credit_card] %></h3>
+        <p>Credit Card Enrollments</p>
+      </div>
+      <div class="payment-summary-card license">
+        <h3><%= @dashboard_data[:payment_methods][:license] %></h3>
+        <p>License Enrollments</p>
+      </div>
+      <div class="payment-summary-card total">
+        <h3><%= @dashboard_data[:payment_methods][:total] %></h3>
+        <p>Total Enrollments</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms Section -->
+  <div class="terms-section">
+    <h2>Terms Overview</h2>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Term Name</th>
+            <th>Period</th>
+            <th>Courses</th>
+            <th>Students Enrolled</th>
+            <th>Credit Card</th>
+            <th>License</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @dashboard_data[:terms].each do |term_data| %>
+            <tr>
+              <td>
+                <strong><%= term_data[:term].name %></strong>
+              </td>
+              <td>
+                <%= term_data[:term].start_date.strftime("%b %d, %Y") %> - 
+                <%= term_data[:term].end_date.strftime("%b %d, %Y") %>
+              </td>
+              <td><%= term_data[:courses_count] %></td>
+              <td><%= term_data[:students_enrolled] %></td>
+              <td><%= term_data[:credit_card_enrollments] %></td>
+              <td><%= term_data[:license_enrollments] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Courses Section -->
+  <div class="courses-section">
+    <h2>Courses Breakdown</h2>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Course Name</th>
+            <th>Term</th>
+            <th>Total Students</th>
+            <th>Direct Enrollments</th>
+            <th>Term Enrollments</th>
+            <th>Credit Card</th>
+            <th>License</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @dashboard_data[:courses].each do |course_data| %>
+            <tr>
+              <td>
+                <strong><%= course_data[:course].name %></strong>
+              </td>
+              <td><%= course_data[:course].term.name %></td>
+              <td><%= course_data[:students_enrolled] %></td>
+              <td><%= course_data[:direct_enrollments] %></td>
+              <td><%= course_data[:term_enrollments] %></td>
+              <td><%= course_data[:credit_card_enrollments] %></td>
+              <td><%= course_data[:license_enrollments] %></td>
+              <td>
+                <% if course_data[:course].price %>
+                  $<%= number_with_precision(course_data[:course].price, precision: 2) %>
+                <% else %>
+                  <span class="text-muted">Free</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

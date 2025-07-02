@@ -58,6 +58,23 @@ body {
   color: #2d3748;
 }
 
+/* Admin-specific styles */
+.admin-link {
+  background: #4299e1 !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border: 1px solid #4299e1;
+}
+
+.admin-link:hover {
+  background: #3182ce !important;
+  border-color: #3182ce !important;
+  color: white !important;
+}
+
 /* Main content area */
 .main-content {
   min-height: calc(100vh - 80px);

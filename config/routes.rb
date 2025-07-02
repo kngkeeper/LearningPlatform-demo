@@ -18,4 +18,8 @@ Rails.application.routes.draw do
   resources :courses, only: [ :index, :show ] do
     resources :enrollments, only: [ :new, :create ]
   end
+
+  # Dashboard routes for platform admins
+  get "dashboard", to: "dashboard#index"
+  get "dashboard/schools/:school_id", to: "dashboard#school", as: "dashboard_school"
 end

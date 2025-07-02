@@ -1,0 +1,235 @@
+/* Dashboard Styles */
+
+/* Common dashboard container */
+.dashboard-container,
+.school-dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Dashboard headers */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dashboard-header h1 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+}
+
+/* School dashboard header with actions */
+.school-dashboard-container .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.header-content h1 {
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+  font-size: 2.5rem;
+}
+
+/* Stats grid for overview cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+  font-size: 2.25rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Payment statistics sections */
+.payment-stats,
+.payment-overview {
+  margin-bottom: 3rem;
+}
+
+.payment-stats {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.payment-stats h3,
+.payment-overview h2 {
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.payment-overview h2 {
+  font-size: 1.5rem;
+}
+
+/* Payment grids */
+.payment-grid,
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.payment-stat {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.payment-stat h4 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.payment-stat p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+/* Payment summary cards for school dashboard */
+.payment-summary-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.payment-summary-card.credit-card {
+  border-left: 4px solid #4299e1;
+}
+
+.payment-summary-card.license {
+  border-left: 4px solid #48bb78;
+}
+
+.payment-summary-card.total {
+  border-left: 4px solid #9f7aea;
+}
+
+.payment-summary-card h3 {
+  font-size: 2.25rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.payment-summary-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Dashboard sections */
+.overview-section,
+.schools-section,
+.terms-section,
+.courses-section {
+  margin-bottom: 3rem;
+}
+
+.overview-section h2,
+.schools-section h2,
+.terms-section h2,
+.courses-section h2 {
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Dashboard tables */
+.table-responsive {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+  margin: 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #2d3748;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #4a5568;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .school-dashboard-container .dashboard-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header-content {
+    margin-bottom: 1rem;
+  }
+
+  .payment-summary-grid,
+  .payment-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,8 +4,12 @@ class ApplicationController < ActionController::Base
 
   include Pundit::Authorization
 
-  # Redirect to courses after sign in
+  # Redirect to appropriate page after sign in
   def after_sign_in_path_for(resource)
-    root_path
+    if resource.platform_admin?
+      dashboard_path
+    else
+      root_path
+    end
   end
 end

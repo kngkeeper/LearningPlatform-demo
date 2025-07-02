@@ -93,12 +93,89 @@ end
 
 puts "Created #{Course.count} courses across all terms"
 
+# Create students for each school
+School.all.each do |school|
+  5.times do
+    first_name = Faker::Name.first_name
+    last_name = Faker::Name.last_name
+    email = Faker::Internet.unique.email(name: "#{first_name} #{last_name}")
+
+    User.find_or_create_by!(email: email) do |user|
+      user.role = :student
+      user.password = "password123"
+      user.password_confirmation = "password123"
+      user.first_name = first_name
+      user.last_name = last_name
+      user.school_id = school.id
+
+      # Build the associated student record
+      user.build_student(
+        school: school,
+        first_name: first_name,
+        last_name: last_name
+      )
+    end
+  end
+end
+
+puts "Created #{Student.count} students"
+
+# Create licenses for terms
+Term.all.each do |term|
+  5.times do
+    License.find_or_create_by!(
+      school: term.school,
+      term: term,
+      code: License.generate_code(term.school.name.parameterize.upcase, term.start_date.year)
+    )
+  end
+end
+
+puts "Created #{License.count} licenses"
+
+# Enroll students
+Student.all.each do |student|
+  # Enroll in one term via license
+  term_to_enroll = student.school.terms.sample
+  license = term_to_enroll.licenses.where(status: :active).sample
+  if license
+    payment_method = PaymentMethod.create!(student: student, method_type: :license, license: license)
+    purchase = Purchase.create!(student: student, payment_method: payment_method, purchaseable: term_to_enroll)
+    purchase.process!
+    license.update(status: :redeemed)
+  end
+
+  # Enroll in 1-2 individual courses via credit card
+  courses_to_enroll = student.school.courses.where.not(term: term_to_enroll).sample(rand(1..2))
+  courses_to_enroll.each do |course|
+    payment_method = PaymentMethod.create!(
+      student: student,
+      method_type: :credit_card,
+      details: {
+        cardholder_name: student.full_name,
+        card_number: Faker::Finance.credit_card,
+        expiry_month: Faker::Number.between(from: 1, to: 12),
+        expiry_year: Date.current.year + Faker::Number.between(from: 1, to: 5),
+        cvv: Faker::Number.number(digits: 3)
+      }.to_json
+    )
+    purchase = Purchase.create!(student: student, payment_method: payment_method, purchaseable: course)
+    purchase.process!
+  end
+end
+
+puts "Enrolled students in courses and terms"
+
 # Summary
 puts "\n=== Seeding Summary ==="
 puts "Platform Admin Users: #{User.platform_admin.count}"
 puts "Schools: #{School.count}"
 puts "Terms: #{Term.count}"
 puts "Courses: #{Course.count}"
+puts "Students: #{Student.count}"
+puts "Enrollments: #{Enrollment.count}"
+puts "Purchases: #{Purchase.count}"
+puts "Licenses: #{License.count}"
 puts "\nAdmin login credentials:"
 puts "Email: admin@learningplatform.com"
 puts "Password: password123"

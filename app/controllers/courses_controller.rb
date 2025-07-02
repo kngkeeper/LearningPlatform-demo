@@ -1,5 +1,6 @@
 class CoursesController < ApplicationController
   before_action :authenticate_user!
+  before_action :redirect_platform_admins_to_dashboard
   before_action :ensure_student
   before_action :set_course, only: [ :show ]
 
@@ -28,5 +29,9 @@ class CoursesController < ApplicationController
 
   def set_course
     @course = Course.find(params[:id])
+  end
+
+  def redirect_platform_admins_to_dashboard
+    redirect_to dashboard_path if current_user&.platform_admin?
   end
 end

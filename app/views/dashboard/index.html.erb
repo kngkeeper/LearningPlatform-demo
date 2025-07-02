@@ -1,0 +1,85 @@
+<% content_for :title, "Platform Dashboard" %>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Platform Dashboard</h1>
+    <p class="text-muted">Analytics and insights for all schools on the platform</p>
+  </div>
+
+  <!-- Platform Overview -->
+  <div class="overview-section">
+    <h2>Platform Overview</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3><%= @dashboard_data[:overview][:total_schools] %></h3>
+        <p>Total Schools</p>
+      </div>
+      <div class="stat-card">
+        <h3><%= @dashboard_data[:overview][:total_students] %></h3>
+        <p>Total Students</p>
+      </div>
+      <div class="stat-card">
+        <h3><%= @dashboard_data[:overview][:total_courses] %></h3>
+        <p>Total Courses</p>
+      </div>
+      <div class="stat-card">
+        <h3><%= @dashboard_data[:overview][:total_enrollments] %></h3>
+        <p>Active Enrollments</p>
+      </div>
+    </div>
+
+    <div class="payment-stats">
+      <h3>Enrollment by Payment Method</h3>
+      <div class="payment-grid">
+        <div class="payment-stat">
+          <h4><%= @dashboard_data[:overview][:credit_card_enrollments] %></h4>
+          <p>Credit Card Enrollments</p>
+        </div>
+        <div class="payment-stat">
+          <h4><%= @dashboard_data[:overview][:license_enrollments] %></h4>
+          <p>License Enrollments</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schools Section -->
+  <div class="schools-section">
+    <h2>Schools Breakdown</h2>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>School Name</th>
+            <th>Students</th>
+            <th>Terms</th>
+            <th>Courses</th>
+            <th>Active Enrollments</th>
+            <th>Credit Card</th>
+            <th>License</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @dashboard_data[:schools].each do |school_data| %>
+            <tr>
+              <td>
+                <strong><%= school_data[:school].name %></strong>
+              </td>
+              <td><%= school_data[:students_count] %></td>
+              <td><%= school_data[:terms_count] %></td>
+              <td><%= school_data[:courses_count] %></td>
+              <td><%= school_data[:active_enrollments] %></td>
+              <td><%= school_data[:credit_card_enrollments] %></td>
+              <td><%= school_data[:license_enrollments] %></td>
+              <td>
+                <%= link_to "View Details", dashboard_school_path(school_data[:school]), 
+                    class: "btn btn-sm btn-primary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

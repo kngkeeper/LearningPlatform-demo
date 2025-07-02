@@ -187,24 +187,6 @@
   color: #48bb78;
 }
 
-.btn-large {
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
 /* License specific styles */
 .license-note {
   font-size: 0.875rem;

@@ -102,7 +102,17 @@ jobs:
           GITHUB_ACTIONS: true
           DATABASE_URL: mysql2://learning_platform:dummypassword@127.0.0.1:3306/learning_platform_test
           # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:create db:migrate db:migrate:redo VERSION=20250702084944 db:test:prepare
+        run: |
+          bin/rails db:drop db:create
+          bin/rails db:migrate
+          bin/rails db:fixtures:load
+          echo "=== Database Setup Complete ==="
+          echo "Checking if views were created..."
+          mysql -h 127.0.0.1 -P 3306 -u learning_platform -pdummypassword learning_platform_test -e "SHOW FULL TABLES WHERE Table_type = 'VIEW';" || true
+          echo "Testing view access..."
+          mysql -h 127.0.0.1 -P 3306 -u learning_platform -pdummypassword learning_platform_test -e "SELECT COUNT(*) as school_stats_count FROM school_stats;" || echo "Cannot query school_stats view"
+          echo "=== Schema Info ==="
+          mysql -h 127.0.0.1 -P 3306 -u learning_platform -pdummypassword learning_platform_test -e "SHOW TABLES;" || true
 
       - name: Run tests
         env:

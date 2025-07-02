@@ -102,7 +102,7 @@ jobs:
           GITHUB_ACTIONS: true
           DATABASE_URL: mysql2://learning_platform:dummypassword@127.0.0.1:3306/learning_platform_test
           # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:drop db:create db:migrate db:migrate:redo VERSION=20250702084944 db:test:prepare
+        run: bin/rails db:create db:migrate db:migrate:redo VERSION=20250702084944 db:test:prepare
 
       - name: Run tests
         env:

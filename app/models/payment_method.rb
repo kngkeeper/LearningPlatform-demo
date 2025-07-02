@@ -1,5 +1,9 @@
 class PaymentMethod < ApplicationRecord
-  enum :method_type, { credit_card: 0, license: 1 }
+  # Constants for method types to avoid magic numbers
+  CREDIT_CARD_TYPE = 0
+  LICENSE_TYPE = 1
+
+  enum :method_type, { credit_card: CREDIT_CARD_TYPE, license: LICENSE_TYPE }
 
   belongs_to :student
   belongs_to :license, optional: true

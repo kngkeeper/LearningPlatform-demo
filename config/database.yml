@@ -30,7 +30,6 @@ test:
   <% if ENV['CI'] %>
   host: 127.0.0.1
   username: root
-  password: password
   <% end %>
 
 # As with config/credentials.yml, you never want to store sensitive information,

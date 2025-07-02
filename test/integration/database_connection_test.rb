@@ -7,7 +7,10 @@ class DatabaseConnectionTest < ActionDispatch::IntegrationTest
 
     # Test we can execute a simple query
     result = ActiveRecord::Base.connection.execute("SELECT 1 as test_value")
-    assert_equal 1, result.first["test_value"]
+    # Handle different result formats from MySQL adapter
+    first_row = result.first
+    test_value = first_row.is_a?(Hash) ? first_row["test_value"] : first_row[0]
+    assert_equal 1, test_value
   end
 
   test "database configuration is correct for CI environment" do

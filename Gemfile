@@ -63,6 +63,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "shoulda-matchers"
+  gem "sqlite3"
 end
 
 # Use devise for authentication

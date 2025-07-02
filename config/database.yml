@@ -27,6 +27,11 @@ development:
 test:
   <<: *default
   database: learning_platform_test
+  <% if ENV['CI'] %>
+  host: 127.0.0.1
+  username: root
+  password: password
+  <% end %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is

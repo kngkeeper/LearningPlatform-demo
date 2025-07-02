@@ -20,54 +20,60 @@
       <div class="enrollment-cards">
         <!-- Direct Course Purchase -->
         <div class="enrollment-card" data-option="course">
-          <div class="card-header">
-            <input type="radio" name="enrollment_option" id="course_option" value="course" checked>
-            <label for="course_option" class="card-title">
-              <h3>Purchase This Course</h3>
-            </label>
-          </div>
-          
-          <div class="card-content">
-            <div class="price-display">
-              <span class="price">$<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %></span>
+          <label for="course_option" class="card-wrapper">
+            <div class="card-header">
+              <input type="radio" name="enrollment_option" id="course_option" value="course" checked>
+              <div class="card-title">
+                <h3>Purchase This Course</h3>
+              </div>
             </div>
             
-          </div>
+            <div class="card-content">
+              <div class="price-display">
+                <span class="price">$<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %></span>
+              </div>
+              
+            </div>
+          </label>
         </div>
 
         <!-- Term Subscription -->
         <div class="enrollment-card" data-option="term">
-          <div class="card-header">
-            <input type="radio" name="enrollment_option" id="term_option" value="term">
-            <label for="term_option" class="card-title">
-              <h3>Purchase Full Term</h3>
-            </label>
-          </div>
-          
-          <div class="card-content">
-            <div class="price-display">
-              <span class="price">$<%= number_with_precision(@enrollment_options[:term][:price], precision: 0) %></span>
-              <span class="price-note">for all courses</span>
+          <label for="term_option" class="card-wrapper">
+            <div class="card-header">
+              <input type="radio" name="enrollment_option" id="term_option" value="term">
+              <div class="card-title">
+                <h3>Purchase Full Term</h3>
+              </div>
             </div>
-          </div>
+            
+            <div class="card-content">
+              <div class="price-display">
+                <span class="price">$<%= number_with_precision(@enrollment_options[:term][:price], precision: 0) %></span>
+                <span class="price-note">for all courses</span>
+              </div>
+            </div>
+          </label>
         </div>
 
         <!-- License Code Option -->
         <div class="enrollment-card" data-option="license">
-          <div class="card-header">
-            <input type="radio" name="enrollment_option" id="license_option" value="license">
-            <label for="license_option" class="card-title">
-              <h3>Term License Code</h3>
-            </label>
-          </div>
-          
-          <div class="card-content">
-            <div class="price-display">
-              <span class="price">$0</span>
-              <span class="price-note">for all courses</span>
+          <label for="license_option" class="card-wrapper">
+            <div class="card-header">
+              <input type="radio" name="enrollment_option" id="license_option" value="license">
+              <div class="card-title">
+                <h3>Term License Code</h3>
+              </div>
             </div>
             
-          </div>
+            <div class="card-content">
+              <div class="price-display">
+                <span class="price">$0</span>
+                <span class="price-note">for all courses</span>
+              </div>
+              
+            </div>
+          </label>
         </div>
       </div>
     </div>
@@ -218,6 +224,32 @@ document.addEventListener('DOMContentLoaded', function() {
   courseOption.addEventListener('change', updateSelection);
   termOption.addEventListener('change', updateSelection);
   licenseOption.addEventListener('change', updateSelection);
+  
+  // Add click handlers to card elements to make entire card clickable
+  const courseCard = document.querySelector('[data-option="course"]');
+  const termCard = document.querySelector('[data-option="term"]');
+  const licenseCard = document.querySelector('[data-option="license"]');
+  
+  courseCard.addEventListener('click', function(e) {
+    if (e.target.type !== 'radio') {
+      courseOption.checked = true;
+      updateSelection();
+    }
+  });
+  
+  termCard.addEventListener('click', function(e) {
+    if (e.target.type !== 'radio') {
+      termOption.checked = true;
+      updateSelection();
+    }
+  });
+  
+  licenseCard.addEventListener('click', function(e) {
+    if (e.target.type !== 'radio') {
+      licenseOption.checked = true;
+      updateSelection();
+    }
+  });
   
   // Initialize
   updateSelection();

@@ -5,13 +5,20 @@ class CoursesController < ApplicationController
   before_action :set_course, only: [ :show ]
 
   def index
-    @courses = available_courses_for_enrollment
+    authorize Course, :index?
+    @courses = policy_scope(Course).available_for_enrollment(current_user.student.school)
   end
 
   def show
-    authorize @course, :access?
+    authorize @course, :show?
+
+    # Check if user has access to course content
+    unless policy(@course).access?
+      redirect_to courses_path, alert: "You don't have access to this course content."
+      nil
+    end
   rescue Pundit::NotAuthorizedError
-    redirect_to courses_path, alert: "You don't have access to this course."
+    redirect_to courses_path, alert: "You are not authorized to view this course."
   end
 
   private

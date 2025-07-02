@@ -13,7 +13,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     sign_in @student_user
     get dashboard_path
     assert_redirected_to root_path
-    assert_equal "Access denied.", flash[:alert]
+    assert_equal "You are not authorized to access the dashboard.", flash[:alert]
   end
 
   test "should allow platform admin to access dashboard index" do
@@ -27,7 +27,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     sign_in @student_user
     get dashboard_school_path(@school)
     assert_redirected_to root_path
-    assert_equal "Access denied.", flash[:alert]
+    assert_equal "You are not authorized to view school analytics.", flash[:alert]
   end
 
   test "should allow platform admin to access school dashboard" do

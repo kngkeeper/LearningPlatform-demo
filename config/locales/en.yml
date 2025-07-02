@@ -29,3 +29,24 @@
 
 en:
   hello: "Hello world"
+  
+  pundit:
+    default: "You are not authorized to perform this action."
+    dashboard_policy:
+      index?: "You are not authorized to access the dashboard."
+      school?: "You are not authorized to view school analytics."
+    course_policy:
+      index?: "You are not authorized to view courses."
+      show?: "You are not authorized to view this course."
+      access?: "You don't have access to this course."
+      enroll?: "You are not authorized to enroll in this course."
+    enrollment_policy:
+      create?: "You are not authorized to create this enrollment."
+      show?: "You are not authorized to view this enrollment."
+      index?: "You are not authorized to view enrollments."
+    school_policy:
+      index?: "You are not authorized to view schools."
+      show?: "You are not authorized to view this school."
+      create?: "You are not authorized to create schools."
+      update?: "You are not authorized to update this school."
+      destroy?: "You are not authorized to delete this school."

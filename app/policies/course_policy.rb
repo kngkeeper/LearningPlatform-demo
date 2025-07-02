@@ -6,6 +6,20 @@ class CoursePolicy < ApplicationPolicy
     @course = course
   end
 
+  def index?
+    user&.student?
+  end
+
+  def show?
+    return false unless user&.student?
+
+    # Platform admins can view any course
+    return true if user.platform_admin?
+
+    # Students can only view courses from their school
+    user.student.school == @course.school
+  end
+
   def access?
     return false unless user.student
     student = user.student
@@ -35,5 +49,17 @@ class CoursePolicy < ApplicationPolicy
 
     # Can only enroll in available courses
     @course.available?
+  end
+
+  class Scope < Scope
+    def resolve
+      if user&.platform_admin?
+        scope.all
+      elsif user&.student?
+        scope.joins(:term).where(terms: { school: user.student.school })
+      else
+        scope.none
+      end
+    end
   end
 end

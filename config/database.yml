@@ -15,7 +15,12 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: learning_platform
   password: dummypassword
+  <% if ENV['GITHUB_ACTIONS'] %>
+  host: 127.0.0.1
+  port: 3306
+  <% else %>
   socket: /var/run/mysqld/mysqld.sock
+  <% end %>
 
 development:
   <<: *default
@@ -25,18 +30,8 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <% if ENV['CI'] %>
-  adapter: sqlite3
-  database: ":memory:"
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
-  <% else %>
   <<: *default
   database: learning_platform_test
-  username: learning_platform
-  password: dummypassword
-  host: localhost
-  <% end %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is

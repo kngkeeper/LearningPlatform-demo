@@ -58,12 +58,15 @@ jobs:
 
     services:
       mysql:
-        image: mysql
+        image: mysql:8.0
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: learning_platform_test
+          MYSQL_USER: learning_platform
+          MYSQL_PASSWORD: dummypassword
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping -h localhost -u root -proot_password" --health-interval=10s --health-timeout=5s --health-retries=5
 
       # redis:
       #   image: redis
@@ -73,7 +76,7 @@ jobs:
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential default-libmysqlclient-dev git libyaml-dev pkg-config google-chrome-stable
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential default-libmysqlclient-dev mysql-client git libyaml-dev pkg-config google-chrome-stable
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,10 +87,20 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -P 3306 -u learning_platform -pdummypassword --silent; do
+            echo 'Waiting for MySQL...'
+            sleep 2
+          done
+          echo 'MySQL is ready!'
+
       - name: Run tests
         env:
           RAILS_ENV: test
-          DATABASE_URL: mysql2://127.0.0.1:3306
+          CI: true
+          GITHUB_ACTIONS: true
+          DATABASE_URL: mysql2://learning_platform:dummypassword@127.0.0.1:3306/learning_platform_test
           # REDIS_URL: redis://localhost:6379/0
         run: bin/rails db:test:prepare test test:system
 

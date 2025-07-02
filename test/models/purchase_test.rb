@@ -121,6 +121,35 @@ class PurchaseTest < ActiveSupport::TestCase
     assert_includes purchase.errors[:base], "License must be from the same school as the term"
   end
 
+  test "should prevent course purchases with license codes" do
+    license_payment = payment_methods(:john_license_payment)
+
+    purchase = Purchase.new(
+      student: students(:john_harvard),
+      payment_method: license_payment,
+      purchaseable: courses(:harvard_cs101) # Course purchase
+    )
+
+    assert_not purchase.valid?
+    assert_includes purchase.errors[:base], "Courses cannot be purchased using license codes. Please purchase the term instead."
+  end
+
+  test "should allow term purchases with license codes" do
+    license_payment = payment_methods(:john_license_payment)
+
+    purchase = Purchase.new(
+      student: students(:john_harvard),
+      payment_method: license_payment,
+      purchaseable: terms(:harvard_fall_2025) # Term purchase
+    )
+
+    # This should be valid (assuming other validations pass)
+    # Note: The license validation may fail if license is not redeemable,
+    # but the course restriction should not be triggered
+    purchase.valid?
+    assert_not_includes purchase.errors[:base], "Courses cannot be purchased using license codes. Please purchase the term instead."
+  end
+
   test "should deactivate purchase" do
     @course_purchase.deactivate!
     assert_not @course_purchase.active?

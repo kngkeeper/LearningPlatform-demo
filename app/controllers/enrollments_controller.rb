@@ -31,6 +31,8 @@ class EnrollmentsController < ApplicationController
       result = enroll_in_course
     when "term"
       result = enroll_in_term
+    when "license"
+      result = enroll_with_license
     else
       result = { success: false, error: "Invalid enrollment type" }
     end
@@ -46,7 +48,7 @@ class EnrollmentsController < ApplicationController
   private
 
   def payment_params
-    params.permit(:card_number, :expiry_month, :expiry_year, :cvv, :cardholder_name)
+    params.permit(:card_number, :expiry_month, :expiry_year, :cvv, :cardholder_name, :license_code)
   end
 
   def set_course
@@ -79,6 +81,10 @@ class EnrollmentsController < ApplicationController
 
   def enroll_in_term
     process_enrollment(@course.term, payment_params)
+  end
+
+  def enroll_with_license
+    process_license_enrollment(@course.term, params[:license_code])
   end
 
   def process_enrollment(purchaseable, payment_params)
@@ -115,6 +121,65 @@ class EnrollmentsController < ApplicationController
     end
   rescue StandardError => e
     Rails.logger.error "Enrollment error: #{e.message}"
+    { success: false, error: "An error occurred during enrollment. Please try again." }
+  end
+
+  def process_license_enrollment(term, license_code)
+    return { success: false, error: "License code is required" } if license_code.blank?
+
+    student = current_user.student
+
+    # Find the license
+    license = License.find_by(code: license_code.strip.upcase)
+    unless license
+      return { success: false, error: "Invalid license code" }
+    end
+
+    # Validate license is redeemable (active)
+    unless license.redeemable?
+      status_message = case license.status
+      when "expired"
+        "expired"
+      when "redeemed"
+        "already used"
+      else
+        "not valid"
+      end
+      return { success: false, error: "License code is #{status_message}" }
+    end
+
+    # Validate license school matches term school
+    unless license.school == term.school
+      return { success: false, error: "License code is not valid for this school" }
+    end
+
+    # Create license payment method
+    payment_method = student.payment_methods.build(
+      method_type: "license",
+      license: license
+    )
+
+    unless payment_method.save
+      error_messages = payment_method.errors.full_messages.join(", ")
+      return { success: false, error: "License validation error: #{error_messages}" }
+    end
+
+    # Create purchase
+    purchase = student.purchases.build(
+      purchaseable: term,
+      payment_method: payment_method
+    )
+
+    if purchase.process!
+      # Mark license as redeemed
+      license.update!(status: :redeemed)
+      { success: true }
+    else
+      error_messages = purchase.errors.full_messages.join(", ")
+      { success: false, error: "Enrollment failed: #{error_messages}" }
+    end
+  rescue StandardError => e
+    Rails.logger.error "License enrollment error: #{e.message}"
     { success: false, error: "An error occurred during enrollment. Please try again." }
   end
 end

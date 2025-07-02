@@ -57,4 +57,63 @@ class EnrollmentsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to course_url(courses(:harvard_cs102))
   end
+
+  test "should create enrollment with valid license code" do
+    sign_in @student_user
+    license = licenses(:harvard_license_active)
+
+    assert_difference("Enrollment.count", 1) do
+      post course_enrollments_url(@course), params: {
+        enrollment_type: "license",
+        license_code: license.code
+      }
+    end
+
+    # Verify license was marked as redeemed
+    license.reload
+    assert_equal "redeemed", license.status
+
+    assert_redirected_to course_url(@course)
+  end
+
+  test "should reject invalid license code" do
+    sign_in @student_user
+
+    assert_no_difference("Enrollment.count") do
+      post course_enrollments_url(@course), params: {
+        enrollment_type: "license",
+        license_code: "INVALID-CODE"
+      }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "should reject license code from different school" do
+    sign_in @student_user
+    mit_license = licenses(:mit_license)
+
+    assert_no_difference("Enrollment.count") do
+      post course_enrollments_url(@course), params: {
+        enrollment_type: "license",
+        license_code: mit_license.code
+      }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "should reject already redeemed license code" do
+    sign_in @student_user
+    license = licenses(:harvard_license_redeemed)
+
+    assert_no_difference("Enrollment.count") do
+      post course_enrollments_url(@course), params: {
+        enrollment_type: "license",
+        license_code: license.code
+      }
+    end
+
+    assert_response :unprocessable_entity
+  end
 end

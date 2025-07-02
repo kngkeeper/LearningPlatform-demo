@@ -9,6 +9,7 @@ class Purchase < ApplicationRecord
   validate :payment_method_belongs_to_same_student
   validate :purchaseable_is_available
   validate :license_from_same_school_for_term_purchases
+  validate :courses_not_purchasable_with_license
 
   after_initialize :set_default_active
 
@@ -88,6 +89,12 @@ class Purchase < ApplicationRecord
     unless license.school == purchaseable.school
       errors.add(:base, "License must be from the same school as the term")
     end
+  end
+
+  def courses_not_purchasable_with_license
+    return unless purchaseable.is_a?(Course) && payment_method&.license?
+
+    errors.add(:base, "Courses cannot be purchased using license codes. Please purchase the term instead.")
   end
 
   def create_enrollments!

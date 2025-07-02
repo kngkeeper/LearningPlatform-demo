@@ -1,0 +1,107 @@
+#!/usr/bin/env ruby
+
+# Test script for license code enrollment functionality
+require_relative 'config/environment'
+
+puts "=== License Code Enrollment Test ==="
+puts ""
+
+# Set up test data
+student = Student.first
+course = Course.first
+term = course&.term
+license = License.active.find_by(school: term&.school)
+
+if student && course && term && license
+  puts "Found test data:"
+  puts "  Student: #{student.full_name}"
+  puts "  Course: #{course.name}"
+  puts "  Term: #{term.name}"
+  puts "  License: #{license.code} (#{license.status})"
+  puts ""
+
+  # Test the license enrollment process
+  puts "=== Testing License Enrollment Process ==="
+
+  # Create a license payment method (simulating the controller logic)
+  payment_method = student.payment_methods.build(
+    method_type: "license",
+    license: license
+  )
+
+  if payment_method.save
+    puts "✓ License payment method created successfully"
+
+    # Create purchase for term
+    purchase = student.purchases.build(
+      purchaseable: term,
+      payment_method: payment_method
+    )
+
+    if purchase.valid?
+      puts "✓ Purchase validation passed"
+      puts "  Purchase for: #{purchase.purchaseable.name}"
+      puts "  Payment method: #{purchase.payment_method.method_type}"
+      puts "  License code: #{purchase.payment_method.license.code}"
+    else
+      puts "✗ Purchase validation failed:"
+      purchase.errors.full_messages.each do |error|
+        puts "    #{error}"
+      end
+    end
+
+    # Clean up
+    payment_method.destroy
+  else
+    puts "✗ License payment method creation failed:"
+    payment_method.errors.full_messages.each do |error|
+      puts "    #{error}"
+    end
+  end
+
+  puts ""
+
+  # Test that course purchases with license fail
+  puts "=== Testing Course Purchase Restriction ==="
+
+  payment_method = student.payment_methods.build(
+    method_type: "license",
+    license: license
+  )
+
+  if payment_method.save
+    purchase = student.purchases.build(
+      purchaseable: course,  # Try to purchase course instead of term
+      payment_method: payment_method
+    )
+
+    if purchase.valid?
+      puts "✗ UNEXPECTED: Course purchase with license was allowed"
+    else
+      puts "✓ EXPECTED: Course purchase with license was blocked"
+      course_error = purchase.errors.full_messages.any? { |msg| msg.include?("Courses cannot be purchased using license codes") }
+      if course_error
+        puts "  ✓ Correct error message displayed"
+      else
+        puts "  ✗ Unexpected error messages:"
+        purchase.errors.full_messages.each do |error|
+          puts "    #{error}"
+        end
+      end
+    end
+
+    payment_method.destroy
+  else
+    puts "✗ Could not create test license payment method"
+  end
+
+else
+  puts "Missing test data. Please ensure the database has sample data:"
+  puts "  Students: #{Student.count}"
+  puts "  Courses: #{Course.count}"
+  puts "  Terms: #{Term.count}"
+  puts "  Active Licenses: #{License.active.count}"
+end
+
+puts ""
+puts "=== Test Complete ==="

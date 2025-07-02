@@ -32,14 +32,6 @@
               <span class="price">$<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %></span>
             </div>
             
-            <div class="option-details">
-              <p><strong>What you get:</strong></p>
-              <ul>
-                <li>Access to <strong><%= @course.name %></strong></li>
-                <li>Available until <%= @course.term.end_date.strftime("%B %d, %Y") %></li>
-                <li>Immediate access after payment</li>
-              </ul>
-            </div>
           </div>
         </div>
 
@@ -57,15 +49,24 @@
               <span class="price">$<%= number_with_precision(@enrollment_options[:term][:price], precision: 0) %></span>
               <span class="price-note">for all courses</span>
             </div>
-            
-            <div class="option-details">
-              <p><strong>What you get:</strong></p>
-              <ul>
-                <li>Access to <strong>all <%= @enrollment_options[:term][:courses_count] %> courses</strong> in <%= @course.term.name %></li>
-                <li>Available until <%= @course.term.end_date.strftime("%B %d, %Y") %></li>
-                <li>Immediate access after payment</li>
-              </ul>
+          </div>
+        </div>
+
+        <!-- License Code Option -->
+        <div class="enrollment-card" data-option="license">
+          <div class="card-header">
+            <input type="radio" name="enrollment_option" id="license_option" value="license">
+            <label for="license_option" class="card-title">
+              <h3>Term License Code</h3>
+            </label>
+          </div>
+          
+          <div class="card-content">
+            <div class="price-display">
+              <span class="price">$0</span>
+              <span class="price-note">for all courses</span>
             </div>
+            
           </div>
         </div>
       </div>
@@ -76,20 +77,21 @@
       <%= form_with url: course_enrollments_path(@course), local: true, class: "enrollment-form" do |form| %>
         <input type="hidden" name="enrollment_type" id="enrollment_type" value="course">
         
-        <div class="payment-form">
+        <!-- Credit Card Payment Form -->
+        <div class="payment-form" id="credit-card-form">
           <h3>Payment Information</h3>
           
           <div class="form-row">
             <div class="form-group full-width">
               <%= form.label :cardholder_name, "Cardholder Name", class: "form-label" %>
-              <%= form.text_field :cardholder_name, placeholder: "John Doe", class: "form-input", required: true %>
+              <%= form.text_field :cardholder_name, placeholder: "John Doe", class: "form-input" %>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group full-width">
               <%= form.label :card_number, "Card Number", class: "form-label" %>
-              <%= form.text_field :card_number, placeholder: "1234 5678 9012 3456", class: "form-input", maxlength: "23", required: true %>
+              <%= form.text_field :card_number, placeholder: "1234 5678 9012 3456", class: "form-input", maxlength: "23" %>
               <small class="form-help">Enter 13-19 digit card number (spaces and dashes are okay)</small>
             </div>
           </div>
@@ -97,32 +99,45 @@
           <div class="form-row">
             <div class="form-group">
               <%= form.label :expiry_month, "Expiry Month", class: "form-label" %>
-              <%= form.select :expiry_month, (1..12).map { |m| [sprintf("%02d", m), sprintf("%02d", m)] }, { prompt: "Month" }, { class: "form-select", required: true } %>
+              <%= form.select :expiry_month, (1..12).map { |m| [sprintf("%02d", m), sprintf("%02d", m)] }, { prompt: "Month" }, { class: "form-select" } %>
             </div>
             
             <div class="form-group">
               <%= form.label :expiry_year, "Expiry Year", class: "form-label" %>
-              <%= form.select :expiry_year, (Date.current.year..Date.current.year + 10).map { |y| [y, y] }, { prompt: "Year" }, { class: "form-select", required: true } %>
+              <%= form.select :expiry_year, (Date.current.year..Date.current.year + 10).map { |y| [y, y] }, { prompt: "Year" }, { class: "form-select" } %>
             </div>
             
             <div class="form-group">
               <%= form.label :cvv, "CVV", class: "form-label" %>
-              <%= form.text_field :cvv, placeholder: "123", class: "form-input", maxlength: "4", required: true %>
+              <%= form.text_field :cvv, placeholder: "123", class: "form-input", maxlength: "4" %>
               <small class="form-help">3 or 4 digits on back of card</small>
             </div>
           </div>
+        </div>
 
-          <div class="form-actions">
-            <div class="total-display">
-              <span class="total-label">Total:</span>
-              <span class="total-amount" id="total-amount">
-                $<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %>
-              </span>
+        <!-- License Code Form -->
+        <div class="payment-form" id="license-code-form" style="display: none;">
+          <h3>License Code</h3>
+          
+          <div class="form-row">
+            <div class="form-group full-width">
+              <%= form.label :license_code, "License Code", class: "form-label" %>
+              <%= form.text_field :license_code, placeholder: "HARVARD-2025-001", class: "form-input" %>
+              <small class="form-help">Enter your school-provided license code</small>
             </div>
-            
-            <%= form.submit "Complete Enrollment", class: "btn btn-primary btn-large" %>
-            <%= link_to "Cancel", course_path(@course), class: "btn btn-secondary" %>
           </div>
+        </div>
+
+        <div class="form-actions">
+          <div class="total-display">
+            <span class="total-label">Total:</span>
+            <span class="total-amount" id="total-amount">
+              $<%= number_with_precision(@enrollment_options[:course][:price], precision: 0) %>
+            </span>
+          </div>
+          
+          <%= form.submit "Complete Enrollment", class: "btn btn-primary btn-large" %>
+          <%= link_to "Cancel", course_path(@course), class: "btn btn-secondary" %>
         </div>
       <% end %>
     </div>
@@ -133,32 +148,76 @@
 document.addEventListener('DOMContentLoaded', function() {
   const courseOption = document.getElementById('course_option');
   const termOption = document.getElementById('term_option');
+  const licenseOption = document.getElementById('license_option');
   const enrollmentType = document.getElementById('enrollment_type');
   const totalAmount = document.getElementById('total-amount');
+  const creditCardForm = document.getElementById('credit-card-form');
+  const licenseCodeForm = document.getElementById('license-code-form');
   
   const coursePrice = <%= @enrollment_options[:course][:price] %>;
   const termPrice = <%= @enrollment_options[:term][:price] %>;
   
   function updateSelection() {
+    // Update form fields required status
+    const creditCardFields = creditCardForm.querySelectorAll('input, select');
+    const licenseCodeFields = licenseCodeForm.querySelectorAll('input');
+    
     if (courseOption.checked) {
       enrollmentType.value = 'course';
       totalAmount.textContent = '$' + coursePrice.toFixed(0);
       
+      // Show credit card form, hide license form
+      creditCardForm.style.display = 'block';
+      licenseCodeForm.style.display = 'none';
+      
+      // Set required attributes
+      creditCardFields.forEach(field => field.required = true);
+      licenseCodeFields.forEach(field => field.required = false);
+      
       // Visual feedback
       document.querySelector('[data-option="course"]').classList.add('selected');
       document.querySelector('[data-option="term"]').classList.remove('selected');
+      document.querySelector('[data-option="license"]').classList.remove('selected');
+      
     } else if (termOption.checked) {
       enrollmentType.value = 'term';
       totalAmount.textContent = '$' + termPrice.toFixed(0);
       
+      // Show credit card form, hide license form
+      creditCardForm.style.display = 'block';
+      licenseCodeForm.style.display = 'none';
+      
+      // Set required attributes
+      creditCardFields.forEach(field => field.required = true);
+      licenseCodeFields.forEach(field => field.required = false);
+      
       // Visual feedback
       document.querySelector('[data-option="term"]').classList.add('selected');
       document.querySelector('[data-option="course"]').classList.remove('selected');
+      document.querySelector('[data-option="license"]').classList.remove('selected');
+      
+    } else if (licenseOption.checked) {
+      enrollmentType.value = 'license';
+      totalAmount.textContent = '$0';
+      
+      // Show license form, hide credit card form
+      creditCardForm.style.display = 'none';
+      licenseCodeForm.style.display = 'block';
+      
+      // Set required attributes
+      creditCardFields.forEach(field => field.required = false);
+      licenseCodeFields.forEach(field => field.required = true);
+      
+      // Visual feedback
+      document.querySelector('[data-option="license"]').classList.add('selected');
+      document.querySelector('[data-option="course"]').classList.remove('selected');
+      document.querySelector('[data-option="term"]').classList.remove('selected');
     }
   }
   
   courseOption.addEventListener('change', updateSelection);
   termOption.addEventListener('change', updateSelection);
+  licenseOption.addEventListener('change', updateSelection);
   
   // Initialize
   updateSelection();
@@ -187,6 +246,14 @@ document.addEventListener('DOMContentLoaded', function() {
   if (cvvInput) {
     cvvInput.addEventListener('input', function(e) {
       e.target.value = e.target.value.replace(/\D/g, '');
+    });
+  }
+  
+  // License code input - format as uppercase
+  const licenseCodeInput = document.querySelector('input[name="license_code"]');
+  if (licenseCodeInput) {
+    licenseCodeInput.addEventListener('input', function(e) {
+      e.target.value = e.target.value.toUpperCase();
     });
   }
 });

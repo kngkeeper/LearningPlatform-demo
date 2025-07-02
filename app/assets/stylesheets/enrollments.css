@@ -111,27 +111,6 @@
   margin-top: 0.25rem;
 }
 
-.option-details ul {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0 0;
-}
-
-.option-details li {
-  padding: 0.25rem 0;
-  color: #4a5568;
-  position: relative;
-  padding-left: 1.5rem;
-}
-
-.option-details li:before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #48bb78;
-  font-weight: bold;
-}
-
 .payment-section {
   background: white;
   border: 1px solid #dee2e6;
@@ -224,6 +203,33 @@
 
 .btn-secondary:hover {
   background-color: #5a6268;
+}
+
+/* License specific styles */
+.license-note {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+/* Update enrollment cards for three options */
+@media (min-width: 992px) {
+  .enrollment-cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (max-width: 991px) and (min-width: 769px) {
+  .enrollment-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .enrollment-card:nth-child(3) {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 768px) {

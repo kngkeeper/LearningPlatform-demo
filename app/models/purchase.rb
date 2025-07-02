@@ -1,3 +1,17 @@
+# Represents a completed purchase transaction that grants access to courses or terms.
+#
+# Purchases are polymorphic and can be for:
+# - Individual courses: Direct access to a specific course
+# - Terms: Access to all courses within an academic term
+#
+# Business rules enforced:
+# - Payment method must belong to the same student making the purchase
+# - Purchaseable items must be available (not from expired terms)
+# - License codes cannot be used for individual course purchases
+# - License codes must be from the same school as the term being purchased
+#
+# The purchase process creates corresponding enrollment records that track
+# student access permissions.
 class Purchase < ApplicationRecord
   belongs_to :student
   belongs_to :payment_method
@@ -15,6 +29,9 @@ class Purchase < ApplicationRecord
 
   scope :active, -> { where(active: true) }
 
+  # Calculates the total price for this purchase.
+  # For courses: uses the course price
+  # For terms: uses term price if set, otherwise sums all course prices in the term
   def total_price
     case purchaseable
     when Course
@@ -27,6 +44,9 @@ class Purchase < ApplicationRecord
     end
   end
 
+  # Processes the purchase by charging the payment method and creating enrollments.
+  # Returns true if successful, false otherwise.
+  # On success, creates enrollment records that grant access to the purchased content.
   def process!
     return false unless payment_method.processable?
 
@@ -43,6 +63,8 @@ class Purchase < ApplicationRecord
     end
   end
 
+  # Deactivates this purchase, effectively revoking access to the purchased content.
+  # Enrollments remain but become inactive due to the purchase status.
   def deactivate!
     update_columns(active: false)
     # Note: Enrollments don't have an active column - their active status
@@ -63,6 +85,8 @@ class Purchase < ApplicationRecord
     end
   end
 
+  # Validates that the item being purchased is still available.
+  # Items become unavailable once their associated term has ended.
   def purchaseable_is_available
     return unless purchaseable
 
@@ -80,6 +104,7 @@ class Purchase < ApplicationRecord
     end
   end
 
+  # Enforces business rule: license codes must be from the same school as the term
   def license_from_same_school_for_term_purchases
     return unless purchaseable.is_a?(Term) && payment_method&.license?
 
@@ -91,12 +116,16 @@ class Purchase < ApplicationRecord
     end
   end
 
+  # Enforces business rule: license codes cannot be used for individual course purchases
   def courses_not_purchasable_with_license
     return unless purchaseable.is_a?(Course) && payment_method&.license?
 
     errors.add(:base, "Courses cannot be purchased using license codes. Please purchase the term instead.")
   end
 
+  # Creates enrollment records based on the type of purchase.
+  # Course purchases create a single enrollment for that course.
+  # Term purchases create an enrollment for the term, granting access to all courses within it.
   def create_enrollments!
     case purchaseable
     when Course

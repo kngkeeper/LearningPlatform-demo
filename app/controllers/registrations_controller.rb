@@ -1,3 +1,13 @@
+# Custom Devise registration controller that handles student account creation.
+#
+# Extends the default Devise registration flow to:
+# - Automatically assign student role to new registrations
+# - Create associated Student profile records
+# - Link students to their selected school during registration
+# - Ensure proper school-based access control from account creation
+#
+# This controller enforces the business rule that all new registrations
+# are students (staff/admin accounts are created separately).
 class RegistrationsController < Devise::RegistrationsController
   before_action :configure_sign_up_params, only: [ :create ]
   before_action :configure_account_update_params, only: [ :update ]
@@ -10,6 +20,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   # POST /resource
+  # Creates a new user account and associated student profile
   def create
     build_resource(sign_up_params)
 

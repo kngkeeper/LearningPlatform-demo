@@ -1,3 +1,13 @@
+# Handles payment processing for course and term purchases.
+#
+# Supports two payment methods:
+# - Credit cards: Stores encrypted payment details as JSON
+# - License codes: References pre-paid licenses issued by schools
+#
+# Business rules:
+# - License codes can only be used for term purchases, not individual courses
+# - License codes must belong to the same school as the term being purchased
+# - Credit card details are validated for proper JSON format and required fields
 class PaymentMethod < ApplicationRecord
   # Constants for method types to avoid magic numbers
   CREDIT_CARD_TYPE = 0
@@ -16,6 +26,8 @@ class PaymentMethod < ApplicationRecord
   validates :license, presence: { message: "must exist" }, if: :license?
   validate :license_is_redeemable, if: -> { license? && license.present? }
 
+  # Determines if this payment method can be used for processing payments.
+  # Credit cards require valid JSON details, licenses must be in usable state.
   def processable?
     case method_type
     when "credit_card"
@@ -27,6 +39,10 @@ class PaymentMethod < ApplicationRecord
     end
   end
 
+  # Processes a payment for the specified amount.
+  # Returns a hash with success status and transaction details.
+  # For credit cards, simulates payment processing.
+  # For licenses, creates a reference transaction.
   def process_payment(amount)
     return { success: false, error: "Not processable" } unless processable?
 
@@ -67,13 +83,13 @@ class PaymentMethod < ApplicationRecord
     end
   end
 
+  # Simulates credit card payment processing
   def process_credit_card_payment(amount)
-    # Simulate credit card processing
     { success: true, transaction_id: "cc_#{SecureRandom.hex(8)}", amount: amount }
   end
 
+  # Creates a license-based transaction reference
   def process_license_payment(amount)
-    # License payments are typically processed differently
     { success: true, transaction_id: "lic_#{license.code}", amount: amount }
   end
 

@@ -1,6 +1,16 @@
 #!/usr/bin/env ruby
 
-# Test script for license code enrollment functionality
+# Integration test script for validating the license code enrollment functionality.
+#
+# This script tests the complete license enrollment workflow including:
+# - License payment method creation and validation
+# - Term purchase with license codes (allowed)
+# - Course purchase with license codes (should be blocked)
+# - Business rule enforcement around license usage
+#
+# Run this script to verify the license enrollment system is working correctly
+# after making changes to the purchase/enrollment logic.
+
 require_relative 'config/environment'
 
 puts "=== License Code Enrollment Test ==="
@@ -32,7 +42,7 @@ if student && course && term && license
   if payment_method.save
     puts "✓ License payment method created successfully"
 
-    # Create purchase for term
+    # Create purchase for term (this should succeed)
     purchase = student.purchases.build(
       purchaseable: term,
       payment_method: payment_method

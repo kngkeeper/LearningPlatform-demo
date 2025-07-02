@@ -1,3 +1,10 @@
+# Enforces authorization rules for course access and enrollment permissions.
+#
+# This policy implements the business rules around who can view and enroll in courses:
+# - Students can only access courses from their own school
+# - Platform admins have unrestricted access
+# - Enrollment is only allowed for available courses where the student doesn't already have access
+# - Access is determined by active purchase records (direct course or term subscription)
 class CoursePolicy < ApplicationPolicy
   attr_reader :user, :course
 
@@ -20,6 +27,8 @@ class CoursePolicy < ApplicationPolicy
     user.student.school == @course.school
   end
 
+  # Determines if the user has access to course content (can view lessons, materials, etc.)
+  # Access is granted through either direct course purchase or term subscription
   def access?
     return false unless user.student
     student = user.student
@@ -37,6 +46,8 @@ class CoursePolicy < ApplicationPolicy
     direct_purchase || term_subscription
   end
 
+  # Determines if the user can enroll in this course
+  # Enrollment is blocked if: already has access, wrong school, or course unavailable
   def enroll?
     return false unless user.student
     student = user.student
@@ -52,6 +63,7 @@ class CoursePolicy < ApplicationPolicy
   end
 
   class Scope < Scope
+    # Returns courses visible to the current user based on their role and school affiliation
     def resolve
       if user&.platform_admin?
         scope.all

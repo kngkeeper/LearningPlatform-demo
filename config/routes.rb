@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
+  # Authentication routes with custom registration controller for student profile creation
   devise_for :users, controllers: {
     registrations: "registrations"
   }
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -15,11 +17,13 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "courses#index"
 
+  # Course browsing and enrollment workflow
+  # Students can view courses from their school and enroll through multiple payment methods
   resources :courses, only: [ :index, :show ] do
     resources :enrollments, only: [ :new, :create ]
   end
 
-  # Dashboard routes for platform admins
+  # Analytics dashboard routes for platform administrators and school staff
   get "dashboard", to: "dashboard#index"
   get "dashboard/schools/:school_id", to: "dashboard#school", as: "dashboard_school"
 end

@@ -1,3 +1,13 @@
+# Handles the course enrollment process, supporting multiple payment methods and enrollment types.
+#
+# This controller orchestrates the complex enrollment workflow which includes:
+# - Authorization checks to ensure enrollment eligibility
+# - Support for three enrollment types: individual course, term subscription, license redemption
+# - Payment processing for credit cards and license validation
+# - Creation of purchase and enrollment records upon successful payment
+#
+# The enrollment process enforces business rules around payment methods and ensures
+# data integrity across the purchase-enrollment relationship.
 class EnrollmentsController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_student
@@ -20,6 +30,7 @@ class EnrollmentsController < ApplicationController
     end
   end
 
+  # Processes enrollment based on the selected enrollment type and payment method
   def create
     @enrollment_options = build_enrollment_options
 
@@ -59,6 +70,7 @@ class EnrollmentsController < ApplicationController
     redirect_to new_user_session_path unless current_user&.student?
   end
 
+  # Builds the enrollment options data structure for the frontend
   def build_enrollment_options
     {
       course: {
@@ -87,6 +99,7 @@ class EnrollmentsController < ApplicationController
     process_license_enrollment(@course.term, params[:license_code])
   end
 
+  # Processes credit card enrollment for courses or terms
   def process_enrollment(purchaseable, payment_params)
     student = current_user.student
 
@@ -124,6 +137,7 @@ class EnrollmentsController < ApplicationController
     { success: false, error: "An error occurred during enrollment. Please try again." }
   end
 
+  # Processes license code enrollment specifically for term subscriptions
   def process_license_enrollment(term, license_code)
     return { success: false, error: "License code is required" } if license_code.blank?
 

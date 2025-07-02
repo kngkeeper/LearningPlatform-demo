@@ -1,6 +1,22 @@
+# Creates optimized database views for dashboard analytics and reporting.
+#
+# These views pre-aggregate enrollment and payment statistics to provide
+# fast access to commonly requested metrics without expensive real-time
+# calculations. The views support both platform-wide and school-specific
+# analytics requirements.
+#
+# Views created:
+# - course_enrollment_stats: Per-course enrollment breakdowns by payment method
+# - term_enrollment_stats: Per-term enrollment aggregations
+# - school_stats: Per-school summary statistics
+# - platform_stats: Platform-wide overview metrics
+#
+# The views distinguish between direct course enrollments and term-based
+# enrollments, providing visibility into different enrollment patterns.
 class CreateDashboardViews < ActiveRecord::Migration[8.0]
   def up
-    # View for course enrollment statistics
+    # View for course enrollment statistics aggregating both direct course enrollments
+    # and term-based enrollments that grant access to each course
     execute <<-SQL
       CREATE VIEW course_enrollment_stats AS
       SELECT

@@ -1,3 +1,11 @@
+# Represents an academic term/semester at a school, containing multiple courses.
+#
+# Terms define the enrollment periods and can be purchased as subscriptions
+# that grant access to all courses within the term. Terms can have their own
+# pricing or derive pricing from the sum of their constituent courses.
+#
+# License codes are typically associated with specific terms, allowing schools
+# to distribute prepaid access for entire term subscriptions.
 class Term < ApplicationRecord
   belongs_to :school
   has_many :courses, dependent: :destroy
@@ -13,10 +21,13 @@ class Term < ApplicationRecord
 
   scope :current_and_upcoming, -> { where("end_date >= ?", Date.current) }
 
+  # Determines if this term is currently active (within the start/end date range)
   def active?
     (start_date..end_date).cover?(Date.current)
   end
 
+  # Calculates the total price of all courses in this term.
+  # Used as fallback pricing when the term doesn't have its own price set.
   def courses_total_price
     courses.sum { |course| course.price || 0 }
   end

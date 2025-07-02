@@ -1,3 +1,16 @@
+# Represents pre-paid access codes issued by schools for term enrollment.
+#
+# License codes provide an alternative payment method that allows schools to
+# distribute prepaid access to their students. Each license can be redeemed
+# once for a full term subscription.
+#
+# Lifecycle:
+# - active: Available for redemption
+# - redeemed: Used by a student, cannot be reused
+# - expired: Past the term end date, no longer usable
+#
+# License codes are automatically generated with school and year prefixes
+# for easy identification and administration.
 class License < ApplicationRecord
   enum :status, { active: 0, redeemed: 1, expired: 2 }
 
@@ -18,14 +31,21 @@ class License < ApplicationRecord
     status == "active"
   end
 
+  # Determines if this license can still be used for payments.
+  # Both active and redeemed licenses are considered usable for existing payment methods.
   def usable?
     status == "active" || status == "redeemed"
   end
 
+  # Determines if this license can be redeemed for a new purchase.
+  # Only active licenses can be redeemed.
   def redeemable?
     status == "active"
   end
 
+  # Generates a unique license code with optional school and year prefixes.
+  # When prefixes are provided, format is: SCHOOL-YEAR-XXX
+  # Otherwise uses format: XXXX-XXXX-XXXX
   def self.generate_code(school_prefix = nil, year_prefix = nil)
     if school_prefix && year_prefix
       loop do
@@ -40,6 +60,8 @@ class License < ApplicationRecord
     end
   end
 
+  # Bulk operation to expire licenses from terms that have ended.
+  # Should be run periodically to maintain data integrity.
   def self.expire_old_licenses
     joins(:term).where("terms.end_date < ?", Date.current).update_all(status: :expired)
   end
@@ -55,6 +77,6 @@ class License < ApplicationRecord
   end
 
   def set_redeemed_at
-    self.redeemed_at = Time.current if redeemed_at.blank?
+    self.redeemed_at = Time.current if redeemed? && redeemed_at.blank?
   end
 end

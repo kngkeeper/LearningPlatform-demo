@@ -1,3 +1,13 @@
+# Represents a student enrolled at a school within the learning platform.
+#
+# Students are linked to User accounts for authentication while maintaining
+# school-specific enrollment and payment information. The access control system
+# ensures students can only interact with content from their own school.
+#
+# Key responsibilities:
+# - Managing enrollments and course access permissions
+# - Tracking payment methods and purchase history
+# - Enforcing school-based access restrictions
 class Student < ApplicationRecord
   belongs_to :school
   belongs_to :user
@@ -16,6 +26,10 @@ class Student < ApplicationRecord
     "#{first_name} #{last_name}"
   end
 
+  # Determines if this student has access to a specific course.
+  # Access is granted through active enrollments that cover the course,
+  # either via direct course purchase or term subscription.
+  # Only courses from the same school can be accessed.
   def has_access_to?(course)
     return false unless course.is_a?(Course)
     return false unless course.school == school

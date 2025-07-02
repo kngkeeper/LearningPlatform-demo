@@ -1,4 +1,13 @@
+# Provides aggregated analytics and reporting data for the learning platform.
+#
+# This service centralizes complex queries and calculations used by dashboard views,
+# supporting both platform-wide analytics for administrators and school-specific
+# reporting for individual institutions.
+#
+# The service leverages database views (Views::PlatformStat, Views::SchoolStat, etc.)
+# for optimized performance on frequently accessed analytics data.
 class DashboardService
+  # Returns platform-wide analytics including school statistics and overview metrics
   def platform_analytics
     {
       schools: school_statistics,
@@ -6,6 +15,7 @@ class DashboardService
     }
   end
 
+  # Returns detailed analytics for a specific school including enrollment and payment breakdowns
   def school_analytics(school)
     {
       school: school,
@@ -17,6 +27,7 @@ class DashboardService
 
   private
 
+  # Aggregates platform-wide statistics using optimized database views
   def platform_overview
     # Use the platform_stats view for a single query
     stats = Views::PlatformStat.current
@@ -32,6 +43,7 @@ class DashboardService
     }
   end
 
+  # Generates per-school statistics using pre-aggregated database views
   def school_statistics
     # Use the school_stats view for optimized single query per school
     Views::SchoolStat.includes(:school).map do |school_stat|
@@ -48,8 +60,7 @@ class DashboardService
   end
 
   def term_statistics(school)
-    # Use the term_stats view for simplified querying
-    Views::TermStat.for_school(school).includes(:term).map do |term_stat|
+    Views::TermEnrollmentStat.for_school(school).includes(:term).map do |term_stat|
       {
         term: term_stat.term,
         courses_count: term_stat.courses_count,
@@ -61,33 +72,37 @@ class DashboardService
   end
 
   def course_statistics(school)
-    # Use the course_enrollment_stats view to replace the complex 8-JOIN query
     Views::CourseEnrollmentStat.for_school(school).includes(:course).map do |course_stat|
       {
         course: course_stat.course,
-        students_enrolled: course_stat.total_enrollments,
-        direct_enrollments: course_stat.direct_enrollments,
-        term_enrollments: course_stat.term_enrollments,
-        credit_card_enrollments: course_stat.total_credit_card,
-        license_enrollments: course_stat.total_license
+        students_enrolled: course_stat.students_enrolled,
+        credit_card_enrollments: course_stat.credit_card_enrollments,
+        license_enrollments: course_stat.license_enrollments
       }
     end
   end
 
+  # Aggregates payment method usage statistics for the school
   def payment_method_statistics(school)
-    payment_stats = Enrollment.active
-                              .for_school(school)
-                              .joins(purchase: :payment_method)
-                              .group("payment_methods.method_type")
-                              .count
-
-    credit_card_count = payment_stats["credit_card"] || 0
-    license_count = payment_stats["license"] || 0
+    credit_card_count = Enrollment.for_school(school).by_payment_type(:credit_card).count
+    license_count = Enrollment.for_school(school).by_payment_type(:license).count
 
     {
       credit_card: credit_card_count,
       license: license_count,
       total: credit_card_count + license_count
+    }
+  end
+
+  # Fallback statistics when database views are not available
+  def default_platform_stats
+    {
+      total_schools: 0,
+      total_students: 0,
+      total_courses: 0,
+      total_enrollments: 0,
+      credit_card_enrollments: 0,
+      license_enrollments: 0
     }
   end
 end

@@ -1,3 +1,12 @@
+# Read-only model representing a database view for course enrollment statistics.
+#
+# This view aggregates enrollment data per course to provide efficient access
+# to commonly requested analytics without expensive real-time calculations.
+# Used by the dashboard service to display course-level enrollment metrics.
+#
+# The underlying database view should include:
+# - course_id, school_id, term_id for associations
+# - students_enrolled, credit_card_enrollments, license_enrollments counts
 class Views::CourseEnrollmentStat < ApplicationRecord
   self.table_name = "course_enrollment_stats"
   self.primary_key = "course_id"

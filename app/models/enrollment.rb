@@ -1,3 +1,14 @@
+# Tracks student access to courses and terms through purchase transactions.
+#
+# Enrollments are created automatically when purchases are processed and serve
+# as the authoritative record of what content a student can access. The enrollment
+# system supports two access patterns:
+#
+# - Direct course enrollment: Student purchased a specific course
+# - Term enrollment: Student purchased a term subscription, granting access to all courses in that term
+#
+# Access is determined by both the enrollment record and the active status of
+# the underlying purchase. Deactivated purchases effectively revoke access.
 class Enrollment < ApplicationRecord
   belongs_to :student
   belongs_to :purchase
@@ -14,6 +25,8 @@ class Enrollment < ApplicationRecord
   scope :for_school, ->(school) { joins(:student).where(students: { school: school }) }
   scope :by_payment_type, ->(type) { joins(purchase: :payment_method).where(payment_methods: { method_type: type }) }
 
+  # Returns true if this enrollment provides active access.
+  # Access is contingent on the underlying purchase being active.
   def active?
     purchase&.active?
   end
@@ -22,6 +35,10 @@ class Enrollment < ApplicationRecord
     created_at&.to_date
   end
 
+  # Determines if this enrollment grants access to a specific course.
+  #
+  # For direct course enrollments: only grants access to the enrolled course
+  # For term enrollments: grants access to all courses within the enrolled term
   def grants_access_to?(course)
     return false unless course.is_a?(Course)
 
@@ -45,6 +62,7 @@ class Enrollment < ApplicationRecord
     end
   end
 
+  # Ensures enrollment type matches the purchase type for data integrity
   def enrollable_matches_purchase_for_direct_enrollments
     return unless enrollable && purchase&.purchaseable
 
@@ -59,6 +77,7 @@ class Enrollment < ApplicationRecord
     end
   end
 
+  # Prevents duplicate enrollments for the same purchase and content
   def no_duplicate_enrollments
     return unless student && enrollable && purchase
 

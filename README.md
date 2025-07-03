@@ -1,24 +1,5 @@
-# README
+# Learning Platform Demo
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is a demo of a learning platform implemented in Rails for Skillsetter.
 
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+It uses MySQL and was created on a system using RVM Ruby 3.4.4. It comes with a suite of tests which are currently passing locally, but failing on Github's CI.

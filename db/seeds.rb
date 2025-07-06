@@ -171,7 +171,7 @@ Student.all.each do |student|
     )
 
     # Only process if not already processed
-    purchase.process! if purchase.status == 'pending'
+    purchase.process! if !purchase.active
     license.update(status: :redeemed) if license.status == 'active'
   end
 
@@ -181,7 +181,7 @@ Student.all.each do |student|
 
   courses_to_enroll.each do |course|
     # Check if already enrolled in this course
-    next if student.enrollments.joins(:course).where(courses: { id: course.id }).exists?
+    next if student.enrollments.where(enrollable: course).exists?
 
     payment_method = PaymentMethod.find_or_create_by!(
       student: student,
@@ -201,7 +201,7 @@ Student.all.each do |student|
       payment_method: payment_method,
       purchaseable: course
     )
-    purchase.process! if purchase.status == 'pending'
+    purchase.process! if !purchase.active
   end
 end
 

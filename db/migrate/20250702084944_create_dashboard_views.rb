@@ -109,20 +109,13 @@ class CreateDashboardViews < ActiveRecord::Migration[8.0]
         (SELECT COUNT(*) FROM schools) as total_schools,
         (SELECT COUNT(*) FROM students) as total_students,
         (SELECT COUNT(*) FROM courses) as total_courses,
-        COALESCE(enrollment_counts.total_enrollments, 0) as total_enrollments,
-        COALESCE(enrollment_counts.credit_card_enrollments, 0) as credit_card_enrollments,
-        COALESCE(enrollment_counts.license_enrollments, 0) as license_enrollments
-      FROM (SELECT 1) AS dummy
-      LEFT JOIN (
-        SELECT
-          COUNT(DISTINCT e.id) as total_enrollments,
-          COUNT(DISTINCT CASE WHEN pm.method_type = 0 THEN e.id END) as credit_card_enrollments,
-          COUNT(DISTINCT CASE WHEN pm.method_type = 1 THEN e.id END) as license_enrollments
-        FROM enrollments e
-        JOIN purchases p ON p.id = e.purchase_id AND p.active = true
-        JOIN payment_methods pm ON pm.id = p.payment_method_id
-        JOIN students s ON s.id = e.student_id
-      ) AS enrollment_counts ON 1=1
+        COUNT(DISTINCT e.id) as total_enrollments,
+        COUNT(DISTINCT CASE WHEN pm.method_type = 0 THEN e.id END) as credit_card_enrollments,
+        COUNT(DISTINCT CASE WHEN pm.method_type = 1 THEN e.id END) as license_enrollments
+      FROM enrollments e
+      JOIN purchases p ON p.id = e.purchase_id AND p.active = true
+      JOIN payment_methods pm ON pm.id = p.payment_method_id
+      JOIN students s ON s.id = e.student_id
     SQL
   end
 

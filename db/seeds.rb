@@ -106,7 +106,10 @@ School.all.each do |school|
     first_name = Faker::Name.first_name
     last_name = Faker::Name.last_name
     # Use deterministic email to avoid unique constraint issues
-    email = "#{first_name.downcase}.#{last_name.downcase}.#{school.id}.#{i}@example.com"
+    # Sanitize names to prevent invalid email characters from Faker
+    clean_first_name = first_name.downcase.gsub(/[^a-z0-9]/, "")
+    clean_last_name = last_name.downcase.gsub(/[^a-z0-9]/, "")
+    email = "#{clean_first_name}.#{clean_last_name}.#{school.id}.#{i}@example.com"
 
     User.find_or_create_by!(email: email) do |user|
       user.role = :student
@@ -171,7 +174,7 @@ Student.all.each do |student|
     )
 
     # Only process if not already processed
-    purchase.process! if !purchase.active
+    purchase.process!
     license.update(status: :redeemed) if license.status == 'active'
   end
 
@@ -201,7 +204,7 @@ Student.all.each do |student|
       payment_method: payment_method,
       purchaseable: course
     )
-    purchase.process! if !purchase.active
+    purchase.process!
   end
 end
 

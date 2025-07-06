@@ -104,7 +104,8 @@ jobs:
           # REDIS_URL: redis://localhost:6379/0
         run: |
           bin/rails db:drop db:create
-          bin/rails db:migrate
+          bin/rails db:schema:load
+          bin/rails db:create_views
           bin/rails db:fixtures:load
           echo "=== Database Setup Complete ==="
           echo "Checking if views were created..."

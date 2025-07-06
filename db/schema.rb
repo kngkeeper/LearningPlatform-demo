@@ -72,6 +72,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_084944) do
     t.index ["active"], name: "index_purchases_on_active"
     t.index ["payment_method_id"], name: "index_purchases_on_payment_method_id"
     t.index ["purchaseable_type", "purchaseable_id"], name: "index_purchases_on_purchaseable"
+    t.index ["purchaseable_type", "purchaseable_id"], name: "index_purchases_on_purchaseable_type_and_purchaseable_id"
     t.index ["student_id"], name: "index_purchases_on_student_id"
   end
 
@@ -118,6 +119,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_084944) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "courses", "terms"
+  add_foreign_key "enrollments", "purchases"
+  add_foreign_key "enrollments", "students"
   add_foreign_key "licenses", "schools"
   add_foreign_key "licenses", "terms"
   add_foreign_key "payment_methods", "licenses"

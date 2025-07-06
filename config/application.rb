@@ -24,7 +24,7 @@ module LearningPlatform
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Use SQL format for schema dumps to preserve database views
-    config.active_record.schema_format = :sql
+    # Use Ruby format for schema dumps for better CI compatibility
+    config.active_record.schema_format = :ruby
   end
 end

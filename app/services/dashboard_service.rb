@@ -60,7 +60,7 @@ class DashboardService
   end
 
   def term_statistics(school)
-    Views::TermEnrollmentStat.for_school(school).includes(:term).map do |term_stat|
+    Views::TermStat.for_school(school).includes(:term).map do |term_stat|
       {
         term: term_stat.term,
         courses_count: term_stat.courses_count,
@@ -76,6 +76,8 @@ class DashboardService
       {
         course: course_stat.course,
         students_enrolled: course_stat.students_enrolled,
+        direct_enrollments: course_stat.direct_enrollments,
+        term_enrollments: course_stat.term_enrollments,
         credit_card_enrollments: course_stat.credit_card_enrollments,
         license_enrollments: course_stat.license_enrollments
       }

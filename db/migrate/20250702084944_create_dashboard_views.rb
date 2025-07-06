@@ -29,9 +29,9 @@ class CreateDashboardViews < ActiveRecord::Migration[8.0]
         COALESCE(term_stats.term_enrollments, 0) as term_enrollments,
         COALESCE(term_stats.term_credit_card, 0) as term_credit_card,
         COALESCE(term_stats.term_license, 0) as term_license,
-        COALESCE(direct_stats.direct_enrollments, 0) + COALESCE(term_stats.term_enrollments, 0) as total_enrollments,
-        COALESCE(direct_stats.direct_credit_card, 0) + COALESCE(term_stats.term_credit_card, 0) as total_credit_card,
-        COALESCE(direct_stats.direct_license, 0) + COALESCE(term_stats.term_license, 0) as total_license
+        COALESCE(direct_stats.direct_enrollments, 0) + COALESCE(term_stats.term_enrollments, 0) as students_enrolled,
+        COALESCE(direct_stats.direct_credit_card, 0) + COALESCE(term_stats.term_credit_card, 0) as credit_card_enrollments,
+        COALESCE(direct_stats.direct_license, 0) + COALESCE(term_stats.term_license, 0) as license_enrollments
       FROM courses c
       JOIN terms t ON t.id = c.term_id
       LEFT JOIN (
